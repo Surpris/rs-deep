@@ -21,7 +21,7 @@ pub fn main() {
 fn cast_t2u<T, U>(x: T) -> U
 where
     T: Num + NumCast + Copy,
-    U: Num + NumCast,
+    U: Num + NumCast + Copy,
 {
     U::from(x).unwrap()
 }
