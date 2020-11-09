@@ -2,7 +2,6 @@
 //!
 //!
 
-// use num_traits::float::Float;
 use num_traits::{Num, NumCast};
 use std::ops::AddAssign;
 
