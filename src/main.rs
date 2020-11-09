@@ -10,4 +10,7 @@ fn main() {
 
     // chapter 02
     rs_deep::dlfs01::ch02::gates::main();
+
+    // chapter 03
+    rs_deep::dlfs01::ch03::activation::main();
 }
