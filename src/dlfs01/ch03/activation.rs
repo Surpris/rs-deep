@@ -66,7 +66,9 @@ where
 {
     let zero: T = cast_t2u(0.0);
     let one: T = cast_t2u(1.0);
-    x.iter().map(|&v| if v <= zero { zero } else { one }).collect()
+    x.iter()
+        .map(|&v| if v <= zero { zero } else { one })
+        .collect()
 }
 
 #[allow(dead_code)]
