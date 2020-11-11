@@ -8,5 +8,6 @@ edition = "2018"
 
 [dependencies]
 cast = "0.2.3"
+ndarray = "0.13.1"
 num-traits = "0.2.14"
 plotters = "0.3.0"
