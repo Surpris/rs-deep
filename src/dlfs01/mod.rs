@@ -13,5 +13,6 @@ pub use common::gradient;
 pub use common::loss_function::LossFunc;
 pub use common::math;
 pub use common::math::MathFunc;
+pub use common::operators;
 pub use common::operators::Operators;
 pub use common::util::cast_t2u;

@@ -7,8 +7,6 @@ use crate::dlfs01::math;
 use crate::dlfs01::LossFunc;
 use crate::dlfs01::MathFunc;
 use num_traits::Float;
-use rand::distributions::Uniform;
-use rand::prelude::*;
 
 type Vec2d<T> = Vec<Vec<T>>;
 const EPS: f64 = 1E-4;

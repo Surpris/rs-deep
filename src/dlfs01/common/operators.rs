@@ -2,9 +2,15 @@
 //!
 //! operators
 
+use super::math::MathFunc;
 use super::util::cast_t2u;
 use num_traits::Float;
 
+type Vec2d<T> = Vec<Vec<T>>;
+
+// >>>>>>>>>>>>> Operators >>>>>>>>>>>>>
+
+/// Operators trait
 pub trait Operators<T> {
     /// addition
     fn add_value(&self, other: T) -> Self;
@@ -76,7 +82,7 @@ where
     }
 }
 
-impl<T> Operators<T> for Vec<Vec<T>>
+impl<T> Operators<T> for Vec2d<T>
 where
     T: Float,
 {
@@ -138,10 +144,82 @@ where
         v
     }
     fn transpose(&self) -> Self {
-        let mut dst: Vec<Vec<T>> = Vec::new();
+        let mut dst: Vec2d<T> = Vec::new();
         for ii in 0..self[0].len() {
             dst.push((0..self.len()).map(|jj| self[jj][ii]).collect());
         }
         dst
     }
 }
+
+// <<<<<<<<<<<<< Operators <<<<<<<<<<<<<
+
+// >>>>>>>>>>>>> Fundamental operators >>>>>>>>>>>>>
+
+/// inner product of 1D vectors
+pub fn dot_1d<T>(x: &Vec<T>, y: &Vec<T>) -> T
+where
+    T: Float,
+{
+    assert_eq!(x.len(), y.len());
+    (0..x.len())
+        .map(|ii| x[ii] * y[ii])
+        .collect::<Vec<T>>()
+        .sum()
+}
+
+/// inner product of 1D and 2D vectors
+pub fn dot_1d_2d<T>(x: &Vec<T>, y: &Vec2d<T>) -> Vec<T>
+where
+    T: Float,
+{
+    assert_eq!(x.len(), y.len());
+    let mut dst: Vec<T> = Vec::new();
+    for jj in 0..y[0].len() {
+        dst.push(
+            (0..y.len())
+                .map(|ii| y[ii][jj] * x[ii])
+                .collect::<Vec<T>>()
+                .sum(),
+        );
+    }
+    dst
+}
+
+/// inner product of 2D and 1D vectors
+pub fn dot_2d_1d<T>(x: &Vec2d<T>, y: &Vec<T>) -> Vec<T>
+where
+    T: Float,
+{
+    assert_eq!(x[0].len(), y.len());
+    let mut dst: Vec<T> = Vec::new();
+    for jj in 0..x.len() {
+        dst.push(
+            (0..x[0].len())
+                .map(|ii| x[jj][ii] * y[ii])
+                .collect::<Vec<T>>()
+                .sum(),
+        );
+    }
+    dst
+}
+
+/// inner product of 2D vectors
+pub fn dot_2d_2d<T>(x: &Vec2d<T>, y: &Vec2d<T>) -> Vec2d<T>
+where
+    T: Float,
+{
+    assert_eq!(x[0].len(), y.len());
+    let mut dst: Vec2d<T> = vec![vec![cast_t2u(0.0); y[0].len()]; x.len()];
+    for ii in 0..x.len() {
+        for jj in 0..y[0].len() {
+            dst[ii][jj] = (0..x[0].len())
+                .map(|kk| x[ii][kk] * y[kk][jj])
+                .collect::<Vec<T>>()
+                .sum();
+        }
+    }
+    dst
+}
+
+// <<<<<<<<<<<<< Fundamental operators <<<<<<<<<<<<<

@@ -2,12 +2,16 @@
 //!
 //! mathematical functions
 
+use super::operators::Operators;
 use super::util::cast_t2u;
 use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
+use std::collections::BinaryHeap;
 
 type Vec2d<T> = Vec<Vec<T>>;
+
+const BASE_UP: f64 = 1E6;
 
 // >>>>>>>>>>>>> MathFunc >>>>>>>>>>>>>
 
@@ -15,6 +19,8 @@ type Vec2d<T> = Vec<Vec<T>>;
 pub trait MathFunc<T> {
     /// identity function
     fn identity(&self) -> Self;
+    /// exp function
+    fn exp(&self) -> Self;
     /// ReLU function
     fn relu(&self) -> Self;
     /// gradient of ReLU
@@ -37,6 +43,14 @@ pub trait MathFunc<T> {
     fn min(&self) -> T;
     /// summation function
     fn sum(&self) -> T;
+    /// mean function
+    fn mean(&self) -> T;
+    /// variance function
+    fn var(&self) -> T;
+    /// std function
+    fn std(&self) -> T;
+    /// argmax function
+    fn argmax(&self) -> usize;
 }
 
 impl<T> MathFunc<T> for Vec<T>
@@ -45,6 +59,9 @@ where
 {
     fn identity(&self) -> Self {
         self.clone()
+    }
+    fn exp(&self) -> Self {
+        self.iter().map(|&v| v.exp()).collect()
     }
     fn relu(&self) -> Self {
         let zero: T = cast_t2u(0.0);
@@ -59,7 +76,7 @@ where
     }
     fn sigmoid(&self) -> Self {
         let one: T = cast_t2u(1.0);
-        self.iter().map(|&v| one / (one + T::exp(v))).collect()
+        self.iter().map(|&v| one / (one + T::exp(-v))).collect()
     }
     fn sigmoid_grad(&self) -> Self {
         let one: T = cast_t2u(1.0);
@@ -96,6 +113,111 @@ where
     fn sum(&self) -> T {
         let zero: T = cast_t2u(0.0);
         self.iter().fold(zero, |m, &v| m + v)
+    }
+    fn mean(&self) -> T {
+        self.sum() / cast_t2u(self.len())
+    }
+    fn var(&self) -> T {
+        let mean = self.mean();
+        let two: T = cast_t2u(2.0);
+        self.sub_value(mean).powf(two).mean()
+    }
+    fn std(&self) -> T {
+        let mean = self.mean();
+        let n: T = cast_t2u(self.len() - 1);
+        let two: T = cast_t2u(2.0);
+        (self.sub_value(mean).powf(two).sum() / n).sqrt()
+    }
+    fn argmax(&self) -> usize {
+        let mut q = BinaryHeap::new();
+        for ii in 0..self.len() {
+            q.push((
+                cast_t2u::<T, u64>(cast_t2u::<f64, T>(BASE_UP) * self[ii]),
+                ii,
+            ));
+        }
+        q.pop().unwrap().1
+    }
+}
+
+impl<T> MathFunc<T> for Vec2d<T>
+where
+    T: Float,
+{
+    fn identity(&self) -> Self {
+        self.clone()
+    }
+    fn exp(&self) -> Self {
+        self.iter().map(|v| v.exp()).collect()
+    }
+    fn relu(&self) -> Self {
+        self.iter().map(|v| v.relu()).collect()
+    }
+    fn relu_grad(&self) -> Self {
+        self.iter().map(|v| v.relu_grad()).collect()
+    }
+    fn sigmoid(&self) -> Self {
+        self.iter().map(|v| v.sigmoid()).collect()
+    }
+    fn sigmoid_grad(&self) -> Self {
+        self.iter().map(|v| v.sigmoid_grad()).collect()
+    }
+    fn softmax(&self) -> Self {
+        let x_max: T = self.clone().max();
+        let x2: Vec2d<T> = self.iter().map(|w| w.exp().sub_value(x_max)).collect();
+        let x2_sum: T = x2.clone().sum();
+        x2.iter().map(|v| v.div_value(x2_sum)).collect()
+    }
+    fn step(&self) -> Self {
+        self.iter().map(|v| v.step()).collect()
+    }
+    fn sqrt(&self) -> Self {
+        self.iter().map(|v| v.sqrt()).collect()
+    }
+    fn powf(&self, p: T) -> Self {
+        self.iter().map(|v| v.powf(p)).collect()
+    }
+    fn max(&self) -> T {
+        let zero: T = cast_t2u(0.0);
+        self.iter()
+            .map(|v| v.max())
+            .fold(zero / zero, |m, v| v.max(m))
+    }
+    fn min(&self) -> T {
+        let zero: T = cast_t2u(0.0);
+        self.iter()
+            .map(|v| v.min())
+            .fold(zero / zero, |m, v| v.min(m))
+    }
+    fn sum(&self) -> T {
+        self.iter().map(|v| v.sum()).collect::<Vec<T>>().sum()
+    }
+    fn mean(&self) -> T {
+        self.iter().map(|v| v.mean()).collect::<Vec<T>>().mean()
+    }
+    fn var(&self) -> T {
+        let mean = self.mean();
+        let two: T = cast_t2u(2.0);
+        self.sub_value(mean).powf(two).mean()
+    }
+    fn std(&self) -> T {
+        let mean = self.mean();
+        let n: T = cast_t2u(self.len() - 1);
+        let two: T = cast_t2u(2.0);
+        (self.sub_value(mean).powf(two).sum() / n).sqrt()
+    }
+    fn argmax(&self) -> usize {
+        let mut q = BinaryHeap::new();
+        for ii in 0..self.len() {
+            for jj in 0..self[0].len() {
+                q.push((
+                    cast_t2u::<T, u64>(cast_t2u::<f64, T>(BASE_UP) * self[ii][jj]),
+                    (ii, jj),
+                ));
+            }
+        }
+        let argmax_2d = q.pop().unwrap().1;
+        argmax_2d.0 * self[0].len() + argmax_2d.1
     }
 }
 // <<<<<<<<<<<<< MathFunc <<<<<<<<<<<<<
@@ -196,6 +318,42 @@ where
     } else {
         one
     }
+}
+
+/// equality within tolerance
+pub fn equality_with_tolerance<T>(x: T, y: T, tol: T) -> bool
+where
+    T: Float,
+{
+    if (x - y).abs() <= tol {
+        true
+    } else {
+        false
+    }
+}
+
+pub fn is_any_tol_1d<T>(x: &Vec<T>, y: &Vec<T>, tol: T) -> bool
+where
+    T: Float,
+{
+    for ii in 0..x.len() {
+        if equality_with_tolerance(x[ii], y[ii], tol) {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn is_all_tol_1d<T>(x: &Vec<T>, y: &Vec<T>, tol: T) -> bool
+where
+    T: Float,
+{
+    for ii in 0..x.len() {
+        if !equality_with_tolerance(x[ii], y[ii], tol) {
+            return false;
+        }
+    }
+    true
 }
 
 /// max function
