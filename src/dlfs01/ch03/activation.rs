@@ -1,6 +1,6 @@
-//! relu
+//! activation
 //!
-//! ReLU function
+//! activators
 
 use num_traits::Float;
 use num_traits::{Num, NumCast};

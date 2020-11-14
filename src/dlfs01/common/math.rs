@@ -20,6 +20,10 @@ pub trait MathFunc<T> {
     fn softmax(self) -> Self;
     /// step function
     fn step(self) -> Self;
+    /// zeros_like
+    fn zeros_like(self) -> Self;
+    /// ones_like
+    fn ones_like(self) -> Self;
     /// maximum function
     fn max(self) -> T;
     /// minimum function
@@ -67,6 +71,14 @@ where
         self.iter()
             .map(|&v| if v <= zero { zero } else { one })
             .collect()
+    }
+    fn zeros_like(self) -> Self {
+        let zero: T = cast_t2u(0.0);
+        (0..self.len()).map(|_| zero).collect()
+    }
+    fn ones_like(self) -> Self {
+        let one: T = cast_t2u(1.0);
+        (0..self.len()).map(|_| one).collect()
     }
     fn max(self) -> T {
         let zero: T = cast_t2u(0.0);
