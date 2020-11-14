@@ -4,6 +4,10 @@
 
 use super::util::cast_t2u;
 use num_traits::Float;
+use rand::distributions::Uniform;
+use rand::prelude::*;
+
+type Vec2d<T> = Vec<Vec<T>>;
 
 // >>>>>>>>>>>>> MathFunc >>>>>>>>>>>>>
 
@@ -110,6 +114,7 @@ where
         .collect()
 }
 
+/// create a mesh-grid vectors
 pub fn mesh_grid<T>(x: &[T], y: &[T]) -> (Vec<Vec<T>>, Vec<Vec<T>>)
 where
     T: Float,
@@ -117,6 +122,48 @@ where
     let xx: Vec<Vec<T>> = (0..y.len()).map(|_| x.to_vec()).collect();
     let yy: Vec<Vec<T>> = (0..y.len()).map(|ii| vec![y[ii]; x.len()]).collect();
     (xx, yy)
+}
+
+/// fill a 1D vector with random values
+fn rand_fill_1d<T>(x: &mut Vec<T>, low: T, high: T)
+where
+    T: Float,
+{
+    let mut rng = rand::thread_rng();
+    let gen = Uniform::new(cast_t2u::<T, f64>(low), cast_t2u::<T, f64>(high));
+    for ii in 0..x.len() {
+        x[ii] = cast_t2u::<f64, T>(gen.sample(&mut rng));
+    }
+}
+
+/// fill a 2D vector with random values
+fn rand_fill_2d<T>(x: &mut Vec2d<T>, low: T, high: T)
+where
+    T: Float,
+{
+    for ii in 0..x.len() {
+        rand_fill_1d(&mut x[ii], low, high);
+    }
+}
+
+/// generate a 1D vector with random values
+pub fn rand_uniform_1d<T>(size: usize, low: T, high: T) -> Vec<T>
+where
+    T: Float,
+{
+    let mut dst: Vec<T> = vec![cast_t2u(0.0); size];
+    rand_fill_1d(&mut dst, low, high);
+    dst
+}
+
+/// generate a 1D vector with random values
+pub fn rand_uniform_2d<T>(h: usize, w: usize, low: T, high: T) -> Vec2d<T>
+where
+    T: Float,
+{
+    let mut dst: Vec2d<T> = vec![vec![cast_t2u(0.0); w]; h];
+    rand_fill_2d(&mut dst, low, high);
+    dst
 }
 
 /// ReLU function
