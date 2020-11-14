@@ -18,7 +18,8 @@ fn main() {
     // chapter 04
     // rs_deep::dlfs01::ch04::gradient_1d::main();
     rs_deep::dlfs01::ch04::gradient_2d::main();
-    rs_deep::dlfs01::ch04::gradient_method::main();
+    // rs_deep::dlfs01::ch04::gradient_method::main();
+    rs_deep::dlfs01::ch04::gradient_simple_net::main();
 
     // commom
     let v: Vec<f32> = vec![1.0; 10];

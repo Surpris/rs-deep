@@ -10,19 +10,19 @@ use num_traits::Float;
 /// Math functions trait
 pub trait MathFunc<T> {
     /// identity function
-    fn identity(self) -> Self;
+    fn identity(&self) -> Self;
     /// ReLU function
-    fn relu(self) -> Self;
+    fn relu(&self) -> Self;
     /// gradient of ReLU
-    fn relu_grad(self) -> Self;
+    fn relu_grad(&self) -> Self;
     /// sigmoid function
-    fn sigmoid(self) -> Self;
+    fn sigmoid(&self) -> Self;
     /// gradient of sigmoid
-    fn sigmoid_grad(self) -> Self;
+    fn sigmoid_grad(&self) -> Self;
     /// softmax function
-    fn softmax(self) -> Self;
+    fn softmax(&self) -> Self;
     /// step function
-    fn step(self) -> Self;
+    fn step(&self) -> Self;
     /// sqrt function
     fn sqrt(&self) -> Self;
     /// power function
@@ -39,36 +39,36 @@ impl<T> MathFunc<T> for Vec<T>
 where
     T: Float,
 {
-    fn identity(self) -> Self {
-        self
+    fn identity(&self) -> Self {
+        self.clone()
     }
-    fn relu(self) -> Self {
+    fn relu(&self) -> Self {
         let zero: T = cast_t2u(0.0);
         self.iter().map(|&v| T::max(zero, v)).collect()
     }
-    fn relu_grad(self) -> Self {
+    fn relu_grad(&self) -> Self {
         let zero: T = cast_t2u(0.0);
         let one: T = cast_t2u(1.0);
         self.iter()
             .map(|&v| if v < zero { zero } else { one })
             .collect()
     }
-    fn sigmoid(self) -> Self {
+    fn sigmoid(&self) -> Self {
         let one: T = cast_t2u(1.0);
         self.iter().map(|&v| one / (one + T::exp(v))).collect()
     }
-    fn sigmoid_grad(self) -> Self {
+    fn sigmoid_grad(&self) -> Self {
         let one: T = cast_t2u(1.0);
         let vec: Vec<T> = self.sigmoid();
         (0..vec.len()).map(|ii| (one - vec[ii]) * vec[ii]).collect()
     }
-    fn softmax(self) -> Self {
+    fn softmax(&self) -> Self {
         let x_max: T = self.clone().max();
         let x2: Vec<T> = self.iter().map(|&w| T::exp(w - x_max)).collect();
         let x2_sum: T = x2.clone().sum();
         x2.iter().map(|&v| v / x2_sum).collect()
     }
-    fn step(self) -> Self {
+    fn step(&self) -> Self {
         let zero: T = cast_t2u(0.0);
         let one: T = cast_t2u(1.0);
         self.iter()
@@ -96,7 +96,7 @@ where
 }
 // <<<<<<<<<<<<< MathFunc <<<<<<<<<<<<<
 
-// >>>>>>>>>>>>> Fundamental math algebra >>>>>>>>>>>>>
+// >>>>>>>>>>>>> Fundamental algebra >>>>>>>>>>>>>
 
 /// calculate a [`a`, `b`) vector with a step of `step`.
 /// This function is similar to numpy.arange(a, b, step).
@@ -120,33 +120,35 @@ where
 }
 
 /// ReLU function
-pub fn relu<T>(x: &[T]) -> Vec<T>
+pub fn relu<T>(x: T) -> T
 where
     T: Float,
 {
     let zero: T = cast_t2u(0.0);
-    x.iter().map(|&v| T::max(zero, v)).collect()
+    T::max(zero, x)
 }
 
 /// sigmoid function
-pub fn sigmoid<T>(x: &[T]) -> Vec<T>
+pub fn sigmoid<T>(x: T) -> T
 where
     T: Float,
 {
     let one: T = cast_t2u(1.0);
-    x.iter().map(|&v| one / (one + T::exp(v))).collect()
+    one / (one + x.exp())
 }
 
 /// step function
-pub fn step<T>(x: &[T]) -> Vec<T>
+pub fn step<T>(x: T) -> T
 where
     T: Float,
 {
     let zero: T = cast_t2u(0.0);
     let one: T = cast_t2u(1.0);
-    x.iter()
-        .map(|&v| if v <= zero { zero } else { one })
-        .collect()
+    if x <= zero {
+        zero
+    } else {
+        one
+    }
 }
 
 /// max function
@@ -167,4 +169,4 @@ where
     x.into_iter().fold(zero / zero, |m, &v| v.min(m))
 }
 
-// <<<<<<<<<<<<< Fundamental math algebra <<<<<<<<<<<<<
+// <<<<<<<<<<<<< Fundamental algebra <<<<<<<<<<<<<

@@ -3,9 +3,9 @@
 //! gradient method test
 
 use super::gradient_2d::numerical_gradient_1d;
+use crate::dlfs01::cast_t2u;
 use crate::dlfs01::MathFunc;
 use crate::dlfs01::Operators;
-use crate::dlfs01::cast_t2u;
 use num_traits::Float;
 use plotters::prelude::*;
 
@@ -43,9 +43,16 @@ pub fn main() {
     let init_x: Vec<f32> = vec![-3.0, 4.0];
     let lr: f32 = 0.1;
     let step_num: usize = 20;
-    let (x, history): (Vec<f32>, Vec2d<f32>) = gradient_descent(&function_2, init_x.clone(), lr, step_num);
+    let (x, history): (Vec<f32>, Vec2d<f32>) =
+        gradient_descent(&function_2, init_x.clone(), lr, step_num);
     println!("init_x, final_x: {:?}, {:?}", init_x, x);
-    match plot("./images/gradient_method.png", 480, 640, &history.transpose()[0], &history.transpose()[1]) {
+    match plot(
+        "./images/gradient_method.png",
+        480,
+        640,
+        &history.transpose()[0],
+        &history.transpose()[1],
+    ) {
         Ok(_) => println!("ok"),
         Err(s) => println!("{}", s),
     }
@@ -56,7 +63,7 @@ fn plot(
     height: u32,
     width: u32,
     x: &[f32],
-    y: &[f32]
+    y: &[f32],
 ) -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(file_name, (width, height)).into_drawing_area();
     root.fill(&WHITE)?;
