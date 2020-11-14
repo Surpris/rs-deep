@@ -11,7 +11,7 @@ const EPS: f64 = 1E-4;
 
 type Vec2d<T> = Vec<Vec<T>>;
 
-fn numerical_gradient_1d<T, F: Fn(&Vec<T>) -> T>(f: &F, x: &mut Vec<T>) -> Vec<T>
+pub fn numerical_gradient_1d<T, F: Fn(&Vec<T>) -> T>(f: &F, x: &mut Vec<T>) -> Vec<T>
 where
     T: Float,
 {
@@ -30,8 +30,8 @@ where
 }
 
 /// 1-directional gradient
-/// The 2nd input of this function is assumed to be a Vec<Vec<T>> created by 
-/// horizontally stacking flattened arrays created by meshgrid().
+/// The 2nd input of this function is assumed to be a Vec<Vec<T>> created by
+/// horizontally stacking flattened arrays created by mesh_grid().
 pub fn numerical_gradient_2d<T, F: Fn(&Vec<T>) -> T>(f: &F, x: &mut Vec2d<T>) -> Vec2d<T>
 where
     T: Float,
@@ -47,7 +47,7 @@ fn function_1<T>(x: &Vec<T>) -> T
 where
     T: Float,
 {
-    x.clone().sum()
+    x.sum()
 }
 
 #[allow(dead_code)]

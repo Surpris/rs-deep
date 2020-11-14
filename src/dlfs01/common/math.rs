@@ -23,12 +23,16 @@ pub trait MathFunc<T> {
     fn softmax(self) -> Self;
     /// step function
     fn step(self) -> Self;
+    /// sqrt function
+    fn sqrt(&self) -> Self;
+    /// power function
+    fn powf(&self, p: T) -> Self;
     /// maximum function
-    fn max(self) -> T;
+    fn max(&self) -> T;
     /// minimum function
-    fn min(self) -> T;
+    fn min(&self) -> T;
     /// summation function
-    fn sum(self) -> T;
+    fn sum(&self) -> T;
 }
 
 impl<T> MathFunc<T> for Vec<T>
@@ -71,15 +75,21 @@ where
             .map(|&v| if v <= zero { zero } else { one })
             .collect()
     }
-    fn max(self) -> T {
+    fn sqrt(&self) -> Self {
+        self.iter().map(|v| v.sqrt()).collect()
+    }
+    fn powf(&self, p: T) -> Self {
+        self.iter().map(|v| v.powf(p)).collect()
+    }
+    fn max(&self) -> T {
         let zero: T = cast_t2u(0.0);
         self.iter().fold(zero / zero, |m, &v| v.max(m))
     }
-    fn min(self) -> T {
+    fn min(&self) -> T {
         let zero: T = cast_t2u(0.0);
         self.iter().fold(zero / zero, |m, &v| v.min(m))
     }
-    fn sum(self) -> T {
+    fn sum(&self) -> T {
         let zero: T = cast_t2u(0.0);
         self.iter().fold(zero, |m, &v| m + v)
     }

@@ -4,3 +4,4 @@
 
 pub mod gradient_1d;
 pub mod gradient_2d;
+pub mod gradient_method;
