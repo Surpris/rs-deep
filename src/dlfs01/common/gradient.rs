@@ -2,7 +2,8 @@
 //!
 //! gradient operator
 
-use super::math::MathFunc;
+// use super::math::MathFunc;
+use super::operators::Operators;
 use super::util::cast_t2u;
 use num_traits::Float;
 const EPS: f64 = 1E-4;

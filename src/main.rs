@@ -14,6 +14,12 @@ fn main() {
 
     // chapter 03
     // rs_deep::dlfs01::ch03::activation::main();
+
+    // chapter 04
+    // rs_deep::dlfs01::ch04::gradient_1d::main();
+    rs_deep::dlfs01::ch04::gradient_2d::main();
+
+    // commom
     let v: Vec<f32> = vec![1.0; 10];
     let v2: Vec<f32> = vec![0.5; 10];
     println!("{:?}", v.sum_squared_error(&v2));
