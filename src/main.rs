@@ -1,7 +1,6 @@
 //! rs-deep
 
 extern crate rs_deep;
-use rs_deep::dlfs01::common::loss_function::LossFunc;
 
 fn main() {
     // chapter 01
@@ -23,7 +22,8 @@ fn main() {
     rs_deep::dlfs01::ch04::two_layer_net::main();
 
     // commom
-    let v: Vec<f32> = vec![1.0; 10];
-    let v2: Vec<f32> = vec![0.5; 10];
-    println!("{:?}", v.sum_squared_error(&v2));
+    rs_deep::dlfs01::common::loss_function::main();
+
+    // dataset
+    rs_deep::dlfs01::dataset::main();
 }

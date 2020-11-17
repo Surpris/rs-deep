@@ -46,3 +46,10 @@ where
         self.softmax().cross_entropy_error(other)
     }
 }
+
+pub fn main() {
+    println!("< loss_function sub module >");
+    let v: Vec<f32> = vec![1.0; 10];
+    let v2: Vec<f32> = vec![0.5; 10];
+    println!("{:?}", v.sum_squared_error(&v2));
+}
