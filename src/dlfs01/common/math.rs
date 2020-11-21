@@ -12,7 +12,7 @@ use std::f64::consts::E;
 
 type Vec2d<T> = Vec<Vec<T>>;
 type Vec3d<T> = Vec<Vec2d<T>>;
-type Vec4d<T> = Vec<Vec3d<T>>;
+// type Vec4d<T> = Vec<Vec3d<T>>;
 
 const BASE_UP: f64 = 1E6;
 
@@ -416,7 +416,7 @@ where
     T: Float,
 {
     let one: T = cast_t2u(1.0);
-    one / (one + x.exp())
+    one / (one + T::exp(-x))
 }
 
 /// step function

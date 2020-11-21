@@ -60,8 +60,6 @@ where
             .sum()
     }
     fn cross_entropy_error(&self, other: &Self) -> T {
-        let e: T = cast_t2u(E);
-        let eps: T = cast_t2u(EPS);
         -(0..self.len())
             .map(|ii| self[ii].cross_entropy_error(&other[ii]))
             .collect::<Vec<T>>()
