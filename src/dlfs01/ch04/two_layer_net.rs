@@ -22,6 +22,7 @@ pub trait Model<T> {
     fn predict_prob(&self, x: &Vec<T>) -> Vec<T>;
     fn predict(&self, x: &Vec<T>) -> Vec<T>;
     fn loss(&self, x: &Vec<T>, t: &Vec<T>) -> T;
+    fn loss_by_batch(&self, x: &Vec2d<T>, t: &Vec2d<T>) -> T;
     fn accuracy(&self, x: &Vec2d<T>, t: &Vec2d<T>) -> T;
     fn numerical_gradient(&mut self, x: &Vec<T>, t: &Vec<T>);
     // fn gradient(&mut self, x: &Vec<T>, t: &Vec<T>);
@@ -86,6 +87,10 @@ where
     }
     fn loss(&self, x: &Vec<T>, t: &Vec<T>) -> T {
         self.predict_prob(x).cross_entropy_error(t)
+    }
+    fn loss_by_batch(&self, x: &Vec2d<T>, t: &Vec2d<T>) -> T {
+        let mut predicted: Vec2d<T> = x.iter().map(|v| self.predict_prob(v)).collect();
+        predicted.cross_entropy_error(t)
     }
     fn accuracy(&self, x: &Vec2d<T>, t: &Vec2d<T>) -> T {
         let tol: T = cast_t2u(EPS);
