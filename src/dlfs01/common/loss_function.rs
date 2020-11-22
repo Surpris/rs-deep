@@ -63,7 +63,7 @@ where
         -(0..self.len())
             .map(|ii| self[ii].cross_entropy_error(&other[ii]))
             .collect::<Vec<T>>()
-            .sum()
+            .mean()
     }
     fn softmax_loss(&self, other: &Self) -> T {
         (0..self.len())
