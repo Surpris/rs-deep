@@ -64,7 +64,7 @@ where
             grad_b1,
             grad_w2,
             grad_b2,
-            verbose: true
+            verbose: true,
         }
     }
 }
@@ -196,8 +196,16 @@ where
         self.grad_b1 = da1.transpose().iter().map(|v| v.sum()).collect::<Vec<T>>();
     }
     fn print_detail(&self) {
-        println!("First layer shape: input={}, hidden={}", self.w1.len(), self.w1[0].len());
-        println!("Second layer shape: hidden={}, output={}", self.w2.len(), self.w2[0].len());
+        println!(
+            "First layer shape: input={}, hidden={}",
+            self.w1.len(),
+            self.w1[0].len()
+        );
+        println!(
+            "Second layer shape: hidden={}, output={}",
+            self.w2.len(),
+            self.w2[0].len()
+        );
     }
 }
 

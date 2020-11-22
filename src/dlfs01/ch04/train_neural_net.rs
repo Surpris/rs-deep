@@ -77,12 +77,8 @@ pub fn main() {
             indices.push(rng.gen_range(0, nbr_train_images));
         }
         // choose batched data set
-        let x_batch: Vec2d<f32> = data_set
-            .train_images
-            .shuffle_copy_by_indices(&indices);
-        let t_batch: Vec2d<f32> = data_set
-            .train_labels
-            .shuffle_copy_by_indices(&indices);
+        let x_batch: Vec2d<f32> = data_set.train_images.shuffle_copy_by_indices(&indices);
+        let t_batch: Vec2d<f32> = data_set.train_labels.shuffle_copy_by_indices(&indices);
 
         // calculate gradient
         network.gradient_by_batch(&x_batch, &t_batch);
@@ -105,15 +101,16 @@ pub fn main() {
             print!("validation: ");
             print!("train images... ");
             let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
-            train_result
-                .train_acc_list
-                .push(train_acc);
+            train_result.train_acc_list.push(train_acc);
             println!("test images...");
             let test_acc = network.accuracy(&data_set.test_images, &data_set.test_labels);
-            train_result
-                .test_acc_list
-                .push(test_acc);
-            println!("acc at {} step: train={}, test={}", ii + 1, train_acc, test_acc);
+            train_result.test_acc_list.push(test_acc);
+            println!(
+                "acc at {} step: train={}, test={}",
+                ii + 1,
+                train_acc,
+                test_acc
+            );
         }
     }
     println!("training finished.");
