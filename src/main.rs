@@ -1,6 +1,9 @@
 //! rs-deep
+#![allow(dead_code)]
 
 extern crate rs_deep;
+
+use ndarray::{ArrayD, IxDyn};
 
 fn main() {
     // chapter 01
@@ -24,11 +27,23 @@ fn main() {
 
     // chapter 05
     // rs_deep::dlfs01::ch05::buy_apple::main();
-    rs_deep::dlfs01::ch05::buy_apple_orange::main();
+    // rs_deep::dlfs01::ch05::buy_apple_orange::main();
 
     // commom
     // rs_deep::dlfs01::common::loss_function::main();
+    rs_deep::dlfs01::common::layers::main();
 
     // dataset
     // rs_deep::dlfs01::dataset::main();
+
+    // test
+    // test();
+}
+
+fn test() {
+    let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
+    let b = a.map(|&v| if v == 0.0 { 1.0 } else { 0.0 });
+    for v in a.indexed_iter() {
+        println!("{:?}, {}, {}", v.0, v.1, b[v.0.clone()]);
+    }
 }
