@@ -31,7 +31,8 @@ fn main() {
 
     // commom
     // rs_deep::dlfs01::common::loss_function::main();
-    rs_deep::dlfs01::common::layers::activation::main();
+    // rs_deep::dlfs01::common::layers::activation::main();
+    rs_deep::dlfs01::common::layers::affine::main();
 
     // dataset
     // rs_deep::dlfs01::dataset::main();

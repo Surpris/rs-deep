@@ -3,4 +3,4 @@
 //! Layers
 
 pub mod activation;
-pub mod layer_base;
+pub mod affine;

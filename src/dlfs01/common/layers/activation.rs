@@ -4,12 +4,19 @@
 
 use super::super::math::sigmoid;
 use super::super::util::cast_t2u;
-use super::layer_base::LayerBase;
 use ndarray::{ArrayD, IxDyn};
-use num_traits::{Float, Num, NumCast};
+use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
 use std::marker::PhantomData;
+
+/// Activation layer trait
+pub trait ActivationBase<T> {
+    fn new(shape: &[usize]) -> Self;
+    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
+    fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
+    fn print_detail(&self);
+}
 
 /// ReLU layer
 pub struct ReLU<T> {
@@ -17,13 +24,13 @@ pub struct ReLU<T> {
     phantom: PhantomData<T>,
 }
 
-impl<T> LayerBase<T> for ReLU<T>
+impl<T: 'static> ActivationBase<T> for ReLU<T>
 where
-    T: Num + NumCast + Copy + PartialOrd,
+    T: Float,
 {
     fn new(shape: &[usize]) -> Self {
         ReLU {
-            mask: ArrayD::<u8>::ones(IxDyn(shape)),
+            mask: ArrayD::<u8>::zeros(IxDyn(shape)),
             phantom: PhantomData,
         }
     }
@@ -42,6 +49,9 @@ where
         }
         dst
     }
+    fn print_detail(&self) {
+        println!("ReLU activation layer.");
+    }
 }
 
 /// Sigmoid layer
@@ -49,13 +59,13 @@ pub struct Sigmoid<T> {
     output: ArrayD<T>,
 }
 
-impl<T> LayerBase<T> for Sigmoid<T>
+impl<T: 'static> ActivationBase<T> for Sigmoid<T>
 where
     T: Float,
 {
     fn new(shape: &[usize]) -> Self {
         Sigmoid {
-            output: ArrayD::<T>::ones(IxDyn(shape)),
+            output: ArrayD::<T>::zeros(IxDyn(shape)),
         }
     }
     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
@@ -69,6 +79,9 @@ where
             dst[v.0] = *v.1 * (one - *v.1) * *v.1;
         }
         dst
+    }
+    fn print_detail(&self) {
+        println!("sigmoid activation layer.");
     }
 }
 
