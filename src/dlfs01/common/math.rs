@@ -185,7 +185,7 @@ where
     }
     fn softmax(&self) -> Self {
         let x_max: T = self.clone().max();
-        let x2: Vec2d<T> = self.iter().map(|w| w.exp().sub_value(x_max)).collect();
+        let x2: Vec2d<T> = self.iter().map(|w| w.sub_value(x_max).exp()).collect();
         let x2_sum: T = x2.clone().sum();
         x2.iter().map(|v| v.div_value(x2_sum)).collect()
     }
@@ -273,7 +273,7 @@ where
     }
     fn softmax(&self) -> Self {
         let x_max: T = self.clone().max();
-        let x2: Vec3d<T> = self.iter().map(|w| w.exp().sub_value(x_max)).collect();
+        let x2: Vec3d<T> = self.iter().map(|w| w.sub_value(x_max).exp()).collect();
         let x2_sum: T = x2.clone().sum();
         x2.iter().map(|v| v.div_value(x2_sum)).collect()
     }

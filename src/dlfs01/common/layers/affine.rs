@@ -1,5 +1,5 @@
 //! affine
-//! 
+//!
 //! Affine layer
 
 use super::super::util::cast_t2u;
@@ -44,7 +44,7 @@ where
         let mut dst: Array2<T> = x.dot(&self.weight);
         self.buff = x.clone();
         for v in dst.indexed_iter_mut() {
-            *v.1 = *v.1 + self.bias[v.0.1];
+            *v.1 = *v.1 + self.bias[v.0 .1];
         }
         dst
     }

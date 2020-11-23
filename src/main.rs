@@ -3,7 +3,7 @@
 
 extern crate rs_deep;
 
-use ndarray::{ArrayD, IxDyn};
+use ndarray::{ArrayD, Axis, IxDyn};
 
 fn main() {
     // chapter 01
@@ -32,7 +32,8 @@ fn main() {
     // commom
     // rs_deep::dlfs01::common::loss_function::main();
     // rs_deep::dlfs01::common::layers::activation::main();
-    rs_deep::dlfs01::common::layers::affine::main();
+    // rs_deep::dlfs01::common::layers::affine::main();
+    rs_deep::dlfs01::common::layers::softmax_with_loss::main();
 
     // dataset
     // rs_deep::dlfs01::dataset::main();
@@ -42,9 +43,15 @@ fn main() {
 }
 
 fn test() {
+    println!("test code");
     let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
     let b = a.map(|&v| if v == 0.0 { 1.0 } else { 0.0 });
     for v in a.indexed_iter() {
         println!("{:?}, {}, {}", v.0, v.1, b[v.0.clone()]);
+    }
+
+    let a = ArrayD::<f32>::ones(IxDyn(&[2, 3, 4]));
+    for ax in a.axis_iter(Axis(1)) {
+        println!("{:?}, {}", ax.shape(), ax.sum());
     }
 }

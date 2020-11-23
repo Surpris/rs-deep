@@ -4,7 +4,7 @@
 
 use super::super::math::sigmoid;
 use super::super::util::cast_t2u;
-use ndarray::{ArrayD, IxDyn};
+use ndarray::{ArrayD, Axis, IxDyn};
 use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
@@ -54,7 +54,7 @@ where
     }
 }
 
-/// Sigmoid layer
+/// sigmoid layer
 pub struct Sigmoid<T> {
     output: ArrayD<T>,
 }
@@ -85,6 +85,51 @@ where
     }
 }
 
+/// Activation layer trait
+pub trait SoftmaxBase<T> {
+    fn new(shape: &[usize], axis: usize) -> Self;
+    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
+    fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
+    fn print_detail(&self);
+}
+
+/// softmax layer
+pub struct Softmax<T> {
+    output: ArrayD<T>,
+    axis: usize,
+}
+
+impl<T: 'static> SoftmaxBase<T> for Softmax<T>
+where
+    T: Float,
+{
+    fn new(shape: &[usize], axis: usize) -> Self {
+        Softmax {
+            output: ArrayD::<T>::zeros(IxDyn(shape)),
+            axis,
+        }
+    }
+    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
+        let zero: T = cast_t2u(0.0);
+        let mut dst = x.clone();
+        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+            view.mapv_inplace(|v| T::exp(v - v_max));
+            let v_exp_sum = view.sum();
+            view.mapv_inplace(|v| v / v_exp_sum);
+        }
+        self.output = dst;
+        self.output.clone()
+    }
+    fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T> {
+        // TODO: correct implementation
+        dx.clone()
+    }
+    fn print_detail(&self) {
+        println!("softmax activation layer.");
+    }
+}
+
 pub fn main() {
     println!("< activation sub module> ");
     let mut rng = rand::thread_rng();
@@ -93,19 +138,30 @@ pub fn main() {
     let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
     let a = a.map(|_| gen.sample(&mut rng));
 
-    let mut layer_relu = ReLU::<f32>::new(a.shape());
-    let b = layer_relu.forward(&a);
+    println!("ReLU layer");
+    let mut layer = ReLU::<f32>::new(a.shape());
+    let b = layer.forward(&a);
     let da = ArrayD::<f32>::zeros(IxDyn(a.shape())).map(|_| gen.sample(&mut rng));
-    println!("target: {}", a);
-    println!("relu forward: {}", b);
-    println!("target d: {}", da);
-    println!("relu backward: {}", layer_relu.backward(&da));
+    println!("a: {}", a);
+    println!("forward: {}", b);
+    println!("da: {}", da);
+    println!("backward: {}", layer.backward(&da));
 
-    let mut layer_sigmoid = Sigmoid::<f32>::new(a.shape());
-    let b = layer_sigmoid.forward(&a);
+    println!("sigmoid layer");
+    let mut layer = Sigmoid::<f32>::new(a.shape());
+    let b = layer.forward(&a);
     let da = ArrayD::<f32>::zeros(IxDyn(a.shape())).map(|_| gen.sample(&mut rng));
-    println!("target: {}", a);
-    println!("sigmoid forward: {}", b);
-    println!("target d: {}", da);
-    println!("sigmoid backward: {}", layer_sigmoid.backward(&da));
+    println!("a: {}", a);
+    println!("forward: {}", b);
+    println!("da: {}", da);
+    println!("backward: {}", layer.backward(&da));
+
+    println!("softmax layer");
+    let mut layer = Softmax::<f32>::new(a.shape(), 0);
+    let b = layer.forward(&a);
+    let da = ArrayD::<f32>::zeros(IxDyn(a.shape())).map(|_| gen.sample(&mut rng));
+    println!("a: {}", a);
+    println!("forward: {}, {}", b, b.sum_axis(Axis(1)));
+    println!("da: {}", da);
+    println!("backward: {}", layer.backward(&da));
 }
