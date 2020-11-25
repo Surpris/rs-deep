@@ -22,12 +22,13 @@ fn main() {
     // rs_deep::dlfs01::ch04::gradient_2d::main();
     // rs_deep::dlfs01::ch04::gradient_method::main();
     // rs_deep::dlfs01::ch04::gradient_simple_net::main();
-    // rs_deep::dlfs01::ch04::two_layer_net::main();
+    rs_deep::dlfs01::ch04::two_layer_net::main();
     // rs_deep::dlfs01::ch04::train_neural_net::main();
 
     // chapter 05
     // rs_deep::dlfs01::ch05::buy_apple::main();
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
+    rs_deep::dlfs01::ch05::two_layer_net::main();
 
     // commom
     // rs_deep::dlfs01::common::loss_function::main();

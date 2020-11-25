@@ -21,7 +21,7 @@ pub trait SoftmaxWithLossBase<T> {
 
 /// softmax layer
 pub struct SoftmaxWithLoss<T> {
-    output: ArrayD<T>,
+    pub output: ArrayD<T>,
     target: ArrayD<T>,
     loss: T,
 }
@@ -63,7 +63,6 @@ where
     }
     fn backward(&self, _dx: T) -> ArrayD<T> {
         let batch_size: T = cast_t2u(self.target.len_of(Axis(0)));
-        // TODO: correct implementation
         let mut dst = ArrayD::<T>::zeros(self.target.shape());
         for v in self.target.indexed_iter() {
             dst[v.0.clone()] = (self.output[v.0.clone()] - *v.1) / batch_size;

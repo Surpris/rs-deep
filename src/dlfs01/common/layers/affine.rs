@@ -10,7 +10,7 @@ use rand::prelude::*;
 
 /// Affine layer trait
 pub trait AffineBase<T> {
-    fn new(shape: &(usize, usize)) -> Self;
+    // fn new(shape: &(usize, usize)) -> Self;
     fn forward(&mut self, x: &Array2<T>) -> Array2<T>;
     fn backward(&mut self, dx: &Array2<T>) -> Array2<T>;
     fn print_detail(&self);
@@ -29,6 +29,17 @@ impl<T> Affine<T>
 where
     T: Float,
 {
+    pub fn new(shape: &(usize, usize)) -> Self {
+        let mut rng = rand::thread_rng();
+        let gen = Uniform::new(-1.0f32, 1.0f32);
+        Affine {
+            weight: Array2::<T>::ones(*shape).map(|_| cast_t2u(gen.sample(&mut rng))),
+            bias: Array1::<T>::ones(shape.1).map(|_| cast_t2u(gen.sample(&mut rng))),
+            dw: Array2::<T>::ones(*shape),
+            db: Array1::<T>::ones(shape.1),
+            buff: Array2::<T>::ones(*shape),
+        }
+    }
     pub fn from(weight: &Array2<T>, bias: &Array1<T>) -> Self {
         let shape = weight.shape();
         Affine {
@@ -45,20 +56,9 @@ impl<T: 'static> AffineBase<T> for Affine<T>
 where
     T: Float,
 {
-    fn new(shape: &(usize, usize)) -> Self {
-        let mut rng = rand::thread_rng();
-        let gen = Uniform::new(-1.0f32, 1.0f32);
-        Affine {
-            weight: Array2::<T>::ones(*shape).map(|_| cast_t2u(gen.sample(&mut rng))),
-            bias: Array1::<T>::ones(shape.1).map(|_| cast_t2u(gen.sample(&mut rng))),
-            dw: Array2::<T>::ones(*shape),
-            db: Array1::<T>::ones(shape.1),
-            buff: Array2::<T>::ones(*shape),
-        }
-    }
     fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
-        let mut dst: Array2<T> = x.dot(&self.weight);
         self.buff = x.clone();
+        let mut dst: Array2<T> = x.dot(&self.weight);
         for v in dst.indexed_iter_mut() {
             *v.1 = *v.1 + self.bias[v.0 .1];
         }
@@ -66,8 +66,8 @@ where
     }
     fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
         let dst = dx.dot(&self.weight.t());
-        self.dw = self.buff.t().dot(&dst);
-        self.db = dst.sum_axis(Axis(0));
+        self.dw = self.buff.t().dot(dx);
+        self.db = dx.sum_axis(Axis(0));
         dst
     }
     fn print_detail(&self) {
