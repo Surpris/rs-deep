@@ -12,7 +12,6 @@ use std::marker::PhantomData;
 
 /// Activation layer trait
 pub trait ActivationBase<T> {
-    fn new(shape: &[usize]) -> Self;
     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
     fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
     fn print_detail(&self);
@@ -24,17 +23,26 @@ pub struct ReLU<T> {
     phantom: PhantomData<T>,
 }
 
-impl<T: 'static> ActivationBase<T> for ReLU<T>
+impl<T: 'static> ReLU<T>
 where
     T: Float,
 {
-    fn new(shape: &[usize]) -> Self {
+    pub fn new(shape: &[usize]) -> Self {
         ReLU {
             mask: ArrayD::<u8>::zeros(IxDyn(shape)),
             phantom: PhantomData,
         }
     }
+}
+
+impl<T: 'static> ActivationBase<T> for ReLU<T>
+where
+    T: Float,
+{
     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
+        if self.mask.shape() != x.shape() {
+            self.mask = ArrayD::<u8>::zeros(IxDyn(x.shape()))
+        }
         let zero: T = cast_t2u(0.0);
         self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
         x.map(|&v| if v <= zero { zero } else { v })
@@ -59,15 +67,21 @@ pub struct Sigmoid<T> {
     output: ArrayD<T>,
 }
 
-impl<T: 'static> ActivationBase<T> for Sigmoid<T>
+impl<T: 'static> Sigmoid<T>
 where
     T: Float,
 {
-    fn new(shape: &[usize]) -> Self {
+    pub fn new(shape: &[usize]) -> Self {
         Sigmoid {
             output: ArrayD::<T>::zeros(IxDyn(shape)),
         }
     }
+}
+
+impl<T: 'static> ActivationBase<T> for Sigmoid<T>
+where
+    T: Float,
+{
     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
         self.output = x.map(|&v| sigmoid(v));
         self.output.clone()
@@ -86,12 +100,12 @@ where
 }
 
 /// Activation layer trait
-pub trait SoftmaxBase<T> {
-    fn new(shape: &[usize], axis: usize) -> Self;
-    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
-    fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
-    fn print_detail(&self);
-}
+// pub trait SoftmaxBase<T> {
+//     // fn new(shape: &[usize], axis: usize) -> Self;
+//     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
+//     fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
+//     fn print_detail(&self);
+// }
 
 /// softmax layer
 pub struct Softmax<T> {
@@ -99,16 +113,22 @@ pub struct Softmax<T> {
     axis: usize,
 }
 
-impl<T: 'static> SoftmaxBase<T> for Softmax<T>
+impl<T: 'static> Softmax<T>
 where
     T: Float,
 {
-    fn new(shape: &[usize], axis: usize) -> Self {
+    pub fn new(shape: &[usize], axis: usize) -> Self {
         Softmax {
             output: ArrayD::<T>::zeros(IxDyn(shape)),
             axis,
         }
     }
+}
+
+impl<T: 'static> ActivationBase<T> for Softmax<T>
+where
+    T: Float,
+{
     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
         let zero: T = cast_t2u(0.0);
         let mut dst = x.clone();

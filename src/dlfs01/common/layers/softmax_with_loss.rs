@@ -41,6 +41,7 @@ where
         let zero: T = cast_t2u(0.0);
         let eps: T = cast_t2u(EPS);
         let e: T = cast_t2u(E);
+        let batch_size: T = cast_t2u(x.len_of(Axis(0)));
 
         let mut dst = x.clone();
         for mut view in dst.axis_iter_mut(Axis(0)) {
@@ -51,11 +52,14 @@ where
         }
         self.output = dst.clone();
         self.target = t.clone();
-        self.loss = zero;
-        for v in dst.indexed_iter() {
-            self.loss = self.loss - t[v.0] * (*v.1 + eps).log(e);
-        }
-        self.loss
+        self.loss = dst
+            .indexed_iter()
+            .fold(zero, |m, (ax, v)| m - t[ax] * (*v + eps).log(e));
+        // self.loss = zero;
+        // for v in dst.indexed_iter() {
+        //     self.loss = self.loss - t[v.0] * (*v.1 + eps).log(e);
+        // }
+        self.loss / batch_size
     }
     fn backward(&self, _dx: T) -> ArrayD<T> {
         let batch_size: T = cast_t2u(self.target.len_of(Axis(0)));
@@ -72,7 +76,7 @@ where
 }
 
 pub fn main() {
-    println!("< softmax-with-loss sub module> ");
+    println!("< softmax-with-loss sub module >");
     let mut rng = rand::thread_rng();
     let gen = Uniform::new(-1.0f32, 1.0f32);
 

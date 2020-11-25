@@ -18,10 +18,10 @@ pub trait AffineBase<T> {
 
 /// Affine layer
 pub struct Affine<T> {
-    weight: Array2<T>,
-    bias: Array1<T>,
-    dw: Array2<T>,
-    db: Array1<T>,
+    pub weight: Array2<T>,
+    pub bias: Array1<T>,
+    pub dw: Array2<T>,
+    pub db: Array1<T>,
     buff: Array2<T>,
 }
 
