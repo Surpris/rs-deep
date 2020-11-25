@@ -3,7 +3,7 @@
 
 extern crate rs_deep;
 
-use ndarray::{ArrayD, Axis, IxDyn};
+use ndarray::{Array, Array2, ArrayD, Axis, IxDyn};
 
 fn main() {
     // chapter 01
@@ -22,18 +22,19 @@ fn main() {
     // rs_deep::dlfs01::ch04::gradient_2d::main();
     // rs_deep::dlfs01::ch04::gradient_method::main();
     // rs_deep::dlfs01::ch04::gradient_simple_net::main();
-    rs_deep::dlfs01::ch04::two_layer_net::main();
+    // rs_deep::dlfs01::ch04::two_layer_net::main();
     // rs_deep::dlfs01::ch04::train_neural_net::main();
 
     // chapter 05
     // rs_deep::dlfs01::ch05::buy_apple::main();
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
-    rs_deep::dlfs01::ch05::two_layer_net::main();
+    // rs_deep::dlfs01::ch05::two_layer_net::main();
+    rs_deep::dlfs01::ch05::train_neural_net::main();
 
     // commom
     // rs_deep::dlfs01::common::loss_function::main();
     // rs_deep::dlfs01::common::layers::activation::main();
-    rs_deep::dlfs01::common::layers::affine::main();
+    // rs_deep::dlfs01::common::layers::affine::main();
     // rs_deep::dlfs01::common::layers::softmax_with_loss::main();
 
     // dataset
@@ -55,4 +56,6 @@ fn test() {
     for ax in a.axis_iter(Axis(1)) {
         println!("{:?}, {}", ax.shape(), ax.sum());
     }
+    let a: Array2<f32> = Array::from_shape_vec((2, 2), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+    println!("{}", a);
 }

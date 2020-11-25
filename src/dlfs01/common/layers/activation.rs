@@ -2,6 +2,8 @@
 //!
 //! Activation layers
 
+#![allow(unused_variables)]
+
 use super::super::math::sigmoid;
 use super::super::util::cast_t2u;
 use ndarray::{ArrayD, Axis, IxDyn};
@@ -14,6 +16,9 @@ use std::marker::PhantomData;
 pub trait ActivationBase<T> {
     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
     fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
+    fn update(&mut self, lr: T) {
+        return;
+    }
     fn print_detail(&self);
 }
 

@@ -13,6 +13,7 @@ pub trait AffineBase<T> {
     // fn new(shape: &(usize, usize)) -> Self;
     fn forward(&mut self, x: &Array2<T>) -> Array2<T>;
     fn backward(&mut self, dx: &Array2<T>) -> Array2<T>;
+    fn update(&mut self, lr: T);
     fn print_detail(&self);
 }
 
@@ -69,6 +70,14 @@ where
         self.dw = self.buff.t().dot(dx);
         self.db = dx.sum_axis(Axis(0));
         dst
+    }
+    fn update(&mut self, lr: T) {
+        for v in self.weight.indexed_iter_mut() {
+            *v.1 = *v.1 - lr * self.dw[v.0];
+        }
+        for v in self.bias.indexed_iter_mut() {
+            *v.1 = *v.1 - lr * self.db[v.0];
+        }
     }
     fn print_detail(&self) {
         println!("affine layer.");

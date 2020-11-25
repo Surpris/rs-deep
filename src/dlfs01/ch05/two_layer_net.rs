@@ -14,6 +14,7 @@ pub trait Model<T> {
     fn loss(&mut self, x: &Array2<T>, t: &Array2<T>) -> T;
     fn accuracy(&mut self, x: &Array2<T>, t: &Array2<T>) -> T;
     fn gradient(&mut self, x: &Array2<T>, t: &Array2<T>);
+    fn update(&mut self, x: &Array2<T>, t: &Array2<T>, lr: T);
     fn print_detail(&self);
 }
 
@@ -23,6 +24,7 @@ pub struct TwoLayerNet<T> {
     pub affine2: Affine<T>,
     pub loss_layer: SoftmaxWithLoss<T>,
     pub verbose: bool,
+    pub current_loss: T,
 }
 
 impl<T: 'static> TwoLayerNet<T>
@@ -36,6 +38,7 @@ where
             affine2: Affine::new(&(hidden_size, output_size)),
             loss_layer: SoftmaxWithLoss::new(&[output_size]),
             verbose: false,
+            current_loss: cast_t2u(0.0),
         }
     }
 }
@@ -59,10 +62,11 @@ where
     }
     fn loss(&mut self, x: &Array2<T>, t: &Array2<T>) -> T {
         let y = self.predict_prob(&x);
-        self.loss_layer.forward(
+        self.current_loss = self.loss_layer.forward(
             &y.into_dimensionality::<IxDyn>().unwrap(),
             &t.clone().into_dimensionality::<IxDyn>().unwrap(),
-        )
+        );
+        self.current_loss
     }
     fn accuracy(&mut self, x: &Array2<T>, t: &Array2<T>) -> T {
         let y = self.predict(&x);
@@ -70,23 +74,29 @@ where
     }
     fn gradient(&mut self, x: &Array2<T>, t: &Array2<T>) {
         // forward
-        self.loss(&x, &t);
+        let _ = self.loss(&x, &t);
 
         // backward
         let dx: T = cast_t2u(1.0);
         let dx = self.loss_layer.backward(dx);
-        println!("1: {}", dx);
+        // println!("1: {}", dx);
         let dx = self
             .affine2
             .backward(&dx.into_dimensionality::<Ix2>().unwrap());
-        println!("2: {}", dx);
+        // println!("2: {}", dx);
         let dx = self
             .activator
             .backward(&dx.into_dimensionality::<IxDyn>().unwrap());
-        println!("3: {}", dx);
+        // println!("3: {}", dx);
         let _dx = self
             .affine1
             .backward(&dx.into_dimensionality::<Ix2>().unwrap());
+    }
+    fn update(&mut self, x: &Array2<T>, t: &Array2<T>, lr: T) {
+        self.gradient(&x, &t);
+        self.affine2.update(lr);
+        self.activator.update(lr);
+        self.affine1.update(lr);
     }
     fn print_detail(&self) {
         println!("Two-layer net.");
@@ -98,7 +108,7 @@ where
 }
 
 pub fn main() {
-    println!("< two_layer_net sub module >");
+    println!("< ch05 two_layer_net sub module >");
     let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3);
     net.print_detail();
     let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();
