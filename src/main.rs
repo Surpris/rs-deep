@@ -1,9 +1,14 @@
 //! rs-deep
 #![allow(dead_code)]
 
+#[macro_use]
+extern crate ndarray;
+
 extern crate rs_deep;
+// use rs_deep::dlfs01::common::math_ndarray::MathFunc;
 
 use ndarray::{Array, Array2, ArrayD, Axis, IxDyn};
+use ndarray_stats::QuantileExt;
 
 fn main() {
     // chapter 01
@@ -29,7 +34,7 @@ fn main() {
     // rs_deep::dlfs01::ch05::buy_apple::main();
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
     // rs_deep::dlfs01::ch05::two_layer_net::main();
-    rs_deep::dlfs01::ch05::train_neural_net::main();
+    // rs_deep::dlfs01::ch05::train_neural_net::main();
 
     // commom
     // rs_deep::dlfs01::common::loss_function::main();
@@ -41,7 +46,7 @@ fn main() {
     // rs_deep::dlfs01::dataset::main();
 
     // test
-    // test();
+    test();
 }
 
 fn test() {
@@ -56,6 +61,21 @@ fn test() {
     for ax in a.axis_iter(Axis(1)) {
         println!("{:?}, {}", ax.shape(), ax.sum());
     }
+    let mut ii: usize = 0;
+    for view in a.axis_iter(Axis(0)) {
+        let y = view.slice(s![ii..(ii + 1), ..]);
+        println!("{}, {}", ii, y);
+        ii += 1;
+    }
     let a: Array2<f32> = Array::from_shape_vec((2, 2), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+    let a = a.into_dimensionality::<IxDyn>().unwrap();
+    let argmax = a.argmax().unwrap();
     println!("{}", a);
+    println!("{:?}, {}", argmax.clone(), a[argmax]);
+    // let mut dst: Vec<f32> = Vec::new();
+    // let mut ii: usize = 0;
+    // let indices = [1usize, 0usize];
+    // for index in indices.iter() {
+    //     dst.append(&mut (1.0 * &a.index_axis(Axis(0), *index)).into_vec());
+    // }
 }

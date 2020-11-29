@@ -4,7 +4,8 @@
 
 use crate::dlfs01::cast_t2u;
 use crate::dlfs01::common::layers::*;
-use ndarray::{Array, Array2, Ix2, IxDyn};
+use ndarray::{Array, Array2, Axis, Ix2, IxDyn};
+use ndarray_stats::QuantileExt;
 use num_traits::Float;
 
 pub trait Model<T> {
@@ -58,7 +59,14 @@ where
         y
     }
     fn predict(&mut self, x: &Array2<T>) -> Array2<T> {
-        x.clone()
+        let one: T = cast_t2u(1.0);
+        let y: Array2<T> = self.predict_prob(&x);
+        let mut dst: Array2<T> = Array2::zeros(y.raw_dim());
+        for (view1, mut view2) in y.axis_iter(Axis(0)).zip(dst.axis_iter_mut(Axis(0))) {
+            let y_argmax = view1.argmax().unwrap();
+            view2[y_argmax] = one;
+        }
+        dst
     }
     fn loss(&mut self, x: &Array2<T>, t: &Array2<T>) -> T {
         let y = self.predict_prob(&x);
@@ -69,8 +77,16 @@ where
         self.current_loss
     }
     fn accuracy(&mut self, x: &Array2<T>, t: &Array2<T>) -> T {
-        let y = self.predict(&x);
-        (y - t).sum()
+        let y: Array2<T> = self.predict(&x);
+        let mut acc: f32 = 0.0;
+        for (view1, view2) in y.axis_iter(Axis(0)).zip(t.axis_iter(Axis(0))) {
+            let y_argmax = view1.argmax().unwrap();
+            let t_argmax = view2.argmax().unwrap();
+            if y_argmax == t_argmax {
+                acc += 1.0;
+            }
+        }
+        cast_t2u(acc / t.len_of(Axis(0)) as f32)
     }
     fn gradient(&mut self, x: &Array2<T>, t: &Array2<T>) {
         // forward
@@ -113,8 +129,11 @@ pub fn main() {
     net.print_detail();
     let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();
     let t: Array2<f32> = Array::from_shape_vec((1, 3), vec![0.0, 0.0, 1.0]).unwrap();
+    println!("features: {}", x);
+    println!("target: {}", t);
     println!("predict_prob: {:?}", net.predict_prob(&x));
     println!("predict: {:?}", net.predict(&x));
+    println!("accuracy: {}", net.accuracy(&x, &t));
     println!("loss: {}", net.loss(&x, &t));
     println!("output: {}", net.loss_layer.output);
 

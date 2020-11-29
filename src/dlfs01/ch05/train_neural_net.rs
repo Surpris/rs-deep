@@ -6,11 +6,11 @@
 
 use super::two_layer_net::{Model, TwoLayerNet};
 use crate::dlfs01::common::choice::Choice;
-use crate::dlfs01::dataset::{load_mnist, MNISTDataSetFlattened};
+use crate::dlfs01::dataset::{load_mnist, MNISTDataSetArray2, MNISTDataSet, MNISTDataSetFlattened};
 use crate::dlfs01::math::arange;
 use crate::dlfs01::MathFunc;
 use crate::dlfs01::Operators;
-use ndarray::{Array, Array2, Ix2, IxDyn};
+use ndarray::{Array, Array2, Axis};
 use plotters::prelude::*;
 use rand::prelude::*;
 
@@ -40,12 +40,23 @@ pub fn main() {
     println!("< ch05 train_neural_net sub module >");
     // load MNIST dataset
     println!("load MNIST dataset...");
-    let data_set: MNISTDataSetFlattened<f32> = load_mnist(0u8).unwrap().flatten();
-    let data_set: MNISTDataSetFlattened<f32> = MNISTDataSetFlattened {
-        train_images: data_set.train_images[..NBR_OF_TARGET_IMAGES].to_vec(),
-        train_labels: data_set.train_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
-        test_images: data_set.test_images[..NBR_OF_TARGET_IMAGES].to_vec(),
-        test_labels: data_set.test_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
+    let data_set_raw: MNISTDataSet<f32> = load_mnist(0u8).unwrap();
+    let data_set_flat: MNISTDataSetFlattened<f32> = data_set_raw.clone().flatten();
+    let data_set_flat: MNISTDataSetFlattened<f32> = MNISTDataSetFlattened {
+        train_images: data_set_flat.train_images[..NBR_OF_TARGET_IMAGES].to_vec(),
+        train_labels: data_set_flat.train_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
+        test_images: data_set_flat.test_images[..NBR_OF_TARGET_IMAGES].to_vec(),
+        test_labels: data_set_flat.test_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
+    };
+
+    let data_set: MNISTDataSetArray2<f32> = data_set_raw.into_array2();
+    let input_size = data_set.train_images.len_of(Axis(1));
+    let output_size = data_set.train_labels.len_of(Axis(1));
+    let data_set: MNISTDataSetArray2<f32> = MNISTDataSetArray2 {
+        train_images: 1.0 * &data_set.train_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
+        train_labels: 1.0 * &data_set.train_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
+        test_images: 1.0 * &data_set.test_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
+        test_labels: 1.0 * &data_set.test_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
     };
 
     // set a parameter for training
@@ -55,8 +66,6 @@ pub fn main() {
 
     // initialize a two-layer model
     println!("initialize a model...");
-    let input_size = data_set.train_images[0].len();
-    let output_size = data_set.train_labels[0].len();
     let mut network: TwoLayerNet<f32> = TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size);
     network.print_detail();
     network.verbose = false;
@@ -69,22 +78,24 @@ pub fn main() {
     println!("start training...");
     for ii in 0..NBR_OF_ITERS {
         // choose indices
-        let mut indices: Vec<usize> = Vec::new();
-        for _ in 0..BATCH_SIZE {
-            indices.push(rng.gen_range(0, nbr_train_images));
+        let mut indices: Vec<usize> = vec![0usize; BATCH_SIZE];
+        for jj in 0..BATCH_SIZE {
+            indices[jj] = rng.gen_range(0, nbr_train_images);
         }
+        // let x_batch = data_set.train_images.clone();
         // choose batched data set
         let x_batch: Array2<f32> = Array::from_shape_vec(
             (BATCH_SIZE, input_size),
-            data_set
+            data_set_flat
                 .train_images
                 .shuffle_copy_by_indices(&indices)
                 .flatten(),
         )
         .unwrap();
+        // let t_batch = data_set.train_labels.clone();
         let t_batch: Array2<f32> = Array::from_shape_vec(
             (BATCH_SIZE, output_size),
-            data_set
+            data_set_flat
                 .train_labels
                 .shuffle_copy_by_indices(&indices)
                 .flatten(),
@@ -103,19 +114,19 @@ pub fn main() {
         // validation
         if (ii + 1) % iter_per_epoch == 0 {
             println!("train loss at step {}: {}", ii + 1, network.current_loss);
-            // print!("validation: ");
-            // print!("train images... ");
-            // let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
-            // train_result.train_acc_list.push(train_acc);
-            // println!("test images...");
-            // let test_acc = network.accuracy(&data_set.test_images, &data_set.test_labels);
-            // train_result.test_acc_list.push(test_acc);
-            // println!(
-            //     "acc at {} step: train={}, test={}",
-            //     ii + 1,
-            //     train_acc,
-            //     test_acc
-            // );
+            print!("validation: ");
+            print!("train images... ");
+            let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
+            train_result.train_acc_list.push(train_acc);
+            println!("test images...");
+            let test_acc = network.accuracy(&data_set.test_images, &data_set.test_labels);
+            train_result.test_acc_list.push(test_acc);
+            println!(
+                "acc at {} step: train={}, test={}",
+                ii + 1,
+                train_acc,
+                test_acc
+            );
         }
     }
     println!("training finished.");
@@ -135,32 +146,32 @@ pub fn main() {
         Ok(_) => println!("ok"),
         Err(s) => println!("{}", s),
     }
-    // let x: Vec<f32> = arange(0.0, train_result.train_acc_list.len() as f32, 1.0);
-    // assert_eq!(x.len(), train_result.train_acc_list.len());
-    // match plot(
-    //     "./images/train_acc.png",
-    //     480,
-    //     640,
-    //     &x,
-    //     &train_result.train_acc_list,
-    //     "train accuracy",
-    //     "train accuracy",
-    // ) {
-    //     Ok(_) => println!("ok"),
-    //     Err(s) => println!("{}", s),
-    // }
-    // match plot(
-    //     "./images/test_acc.png",
-    //     480,
-    //     640,
-    //     &x,
-    //     &train_result.test_acc_list,
-    //     "test accuracy",
-    //     "test accuracy",
-    // ) {
-    //     Ok(_) => println!("ok"),
-    //     Err(s) => println!("{}", s),
-    // }
+    let x: Vec<f32> = arange(0.0, train_result.train_acc_list.len() as f32, 1.0);
+    assert_eq!(x.len(), train_result.train_acc_list.len());
+    match plot(
+        "./images/train_acc.png",
+        480,
+        640,
+        &x,
+        &train_result.train_acc_list,
+        "train accuracy",
+        "train accuracy",
+    ) {
+        Ok(_) => println!("ok"),
+        Err(s) => println!("{}", s),
+    }
+    match plot(
+        "./images/test_acc.png",
+        480,
+        640,
+        &x,
+        &train_result.test_acc_list,
+        "test accuracy",
+        "test accuracy",
+    ) {
+        Ok(_) => println!("ok"),
+        Err(s) => println!("{}", s),
+    }
 }
 
 fn plot(

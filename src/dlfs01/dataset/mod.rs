@@ -6,6 +6,7 @@
 
 // use std::io::{BufReader};
 use crate::dlfs01::{cast_t2u, Operators};
+use ndarray::{Array, Array2, ArrayD};
 use num_traits::{Num, NumCast};
 use std::fs::File;
 use std::io;
@@ -44,6 +45,23 @@ const IMG_SIZE: usize = 784;
 const IMG_MAX: u8 = 255;
 const NBR_CLASS: usize = 10;
 
+#[derive(Clone)]
+pub struct MNISTDataSetArray2<T> {
+    pub train_images: Array2<T>,
+    pub train_labels: Array2<T>,
+    pub test_images: Array2<T>,
+    pub test_labels: Array2<T>,
+}
+
+#[derive(Clone)]
+pub struct MNISTDataSetArrayD<T> {
+    pub train_images: ArrayD<T>,
+    pub train_labels: ArrayD<T>,
+    pub test_images: ArrayD<T>,
+    pub test_labels: ArrayD<T>,
+}
+
+#[derive(Clone)]
 pub struct MNISTDataSetFlattened<T> {
     pub train_images: Vec2d<T>,
     pub train_labels: Vec2d<T>,
@@ -51,6 +69,7 @@ pub struct MNISTDataSetFlattened<T> {
     pub test_labels: Vec2d<T>,
 }
 
+#[derive(Clone)]
 pub struct MNISTDataSet<T> {
     pub train_images: Vec4d<T>,
     pub train_labels: Vec2d<T>,
@@ -68,6 +87,37 @@ where
         let test_images: Vec2d<T> = self.test_images.iter().map(|v| v.flatten()).collect();
         let test_labels = self.test_labels;
         MNISTDataSetFlattened {
+            train_images,
+            train_labels,
+            test_images,
+            test_labels,
+        }
+    }
+    pub fn into_array2(self) -> MNISTDataSetArray2<T> {
+        let img_size =
+            self.train_images[1].len() * self.train_images[2].len() * self.train_images[3].len();
+        let target_size = self.train_labels[0].len();
+        let train_images: Array2<T> = Array::from_shape_vec(
+            (self.train_images.len(), img_size),
+            self.train_images.flatten(),
+        )
+        .unwrap();
+        let train_labels: Array2<T> = Array::from_shape_vec(
+            (self.train_labels.len(), target_size),
+            self.train_labels.flatten(),
+        )
+        .unwrap();
+        let test_images: Array2<T> = Array::from_shape_vec(
+            (self.test_images.len(), img_size),
+            self.test_images.flatten(),
+        )
+        .unwrap();
+        let test_labels: Array2<T> = Array::from_shape_vec(
+            (self.test_labels.len(), target_size),
+            self.test_labels.flatten(),
+        )
+        .unwrap();
+        MNISTDataSetArray2 {
             train_images,
             train_labels,
             test_images,
