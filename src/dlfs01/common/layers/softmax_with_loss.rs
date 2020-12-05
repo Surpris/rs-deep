@@ -43,22 +43,19 @@ where
         let e: T = cast_t2u(E);
         let batch_size: T = cast_t2u(x.len_of(Axis(0)));
 
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(0)) {
+        self.output = x.clone();
+        for mut view in self.output.axis_iter_mut(Axis(0)) {
             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
             view.mapv_inplace(|v| T::exp(v - v_max));
             let v_exp_sum = view.sum();
             view.mapv_inplace(|v| v / v_exp_sum);
         }
-        self.output = dst.clone();
+        // self.output = dst.clone();
         self.target = t.clone();
-        self.loss = dst
+        self.loss = self
+            .output
             .indexed_iter()
             .fold(zero, |m, (ax, v)| m - t[ax] * (*v + eps).log(e));
-        // self.loss = zero;
-        // for v in dst.indexed_iter() {
-        //     self.loss = self.loss - t[v.0] * (*v.1 + eps).log(e);
-        // }
         self.loss / batch_size
     }
     fn backward(&self, _dx: T) -> ArrayD<T> {

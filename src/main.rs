@@ -21,8 +21,6 @@ use ndarray_stats::QuantileExt;
 //     }};
 // }
 
-extern crate rs_deep;
-
 fn main() {
     // chapter 01
     // rs_deep::dlfs01::ch01::hungry::main();
@@ -48,7 +46,6 @@ fn main() {
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
     // rs_deep::dlfs01::ch05::two_layer_net::main();
     rs_deep::dlfs01::ch05::train_neural_net::main();
-    
 
     // commom
     // rs_deep::dlfs01::common::loss_function::main();
@@ -86,10 +83,4 @@ fn test() {
     let argmax = a.argmax().unwrap();
     println!("{}", a);
     println!("{:?}, {}", argmax.clone(), a[argmax]);
-    // let mut dst: Vec<f32> = Vec::new();
-    // let mut ii: usize = 0;
-    // let indices = [1usize, 0usize];
-    // for index in indices.iter() {
-    //     dst.append(&mut (1.0 * &a.index_axis(Axis(0), *index)).into_vec());
-    // }
 }
