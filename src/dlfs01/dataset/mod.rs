@@ -94,9 +94,8 @@ where
         }
     }
     pub fn into_array2(self) -> MNISTDataSetArray2<T> {
-        let img_size =
-            self.train_images[1].len() * self.train_images[2].len() * self.train_images[3].len();
-        let target_size = self.train_labels[0].len();
+        let img_size: usize = IMG_DIM.0 * IMG_DIM.1 * IMG_DIM.2;
+        let target_size = NBR_CLASS;
         let train_images: Array2<T> = Array::from_shape_vec(
             (self.train_images.len(), img_size),
             self.train_images.flatten(),

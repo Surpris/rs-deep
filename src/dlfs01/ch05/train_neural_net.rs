@@ -6,7 +6,7 @@
 
 use super::two_layer_net::{Model, TwoLayerNet};
 use crate::dlfs01::common::choice::Choice;
-use crate::dlfs01::dataset::{load_mnist, MNISTDataSetArray2, MNISTDataSet, MNISTDataSetFlattened};
+use crate::dlfs01::dataset::{load_mnist, MNISTDataSet, MNISTDataSetArray2, MNISTDataSetFlattened};
 use crate::dlfs01::math::arange;
 use crate::dlfs01::MathFunc;
 use crate::dlfs01::Operators;
@@ -15,7 +15,7 @@ use plotters::prelude::*;
 use rand::prelude::*;
 
 const HIDDEN_SIZE: usize = 50;
-const NBR_OF_ITERS: usize = 1000;
+const NBR_OF_ITERS: usize = 100;
 const BATCH_SIZE: usize = 100;
 const LEARNING_RATE: f32 = 0.1;
 const NBR_OF_TARGET_IMAGES: usize = 10000;
@@ -60,7 +60,7 @@ pub fn main() {
     };
 
     // set a parameter for training
-    let nbr_train_images: usize = data_set.train_images.len();
+    let nbr_train_images: usize = data_set.train_images.len_of(Axis(0));
     // let iter_per_epoch: usize = usize::max(nbr_train_images / BATCH_SIZE, 1);
     let iter_per_epoch: usize = 10;
 
