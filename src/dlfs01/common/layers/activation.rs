@@ -104,14 +104,6 @@ where
     }
 }
 
-/// Activation layer trait
-// pub trait SoftmaxBase<T> {
-//     // fn new(shape: &[usize], axis: usize) -> Self;
-//     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T>;
-//     fn backward(&self, dx: &ArrayD<T>) -> ArrayD<T>;
-//     fn print_detail(&self);
-// }
-
 /// softmax layer
 pub struct Softmax<T> {
     output: ArrayD<T>,
