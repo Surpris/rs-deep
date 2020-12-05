@@ -333,6 +333,7 @@ where
             + argmax_2d.2
     }
 }
+
 // <<<<<<<<<<<<< MathFunc <<<<<<<<<<<<<
 
 // >>>>>>>>>>>>> Fundamental algebra >>>>>>>>>>>>>

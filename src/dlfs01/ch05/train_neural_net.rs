@@ -75,6 +75,7 @@ pub fn main() {
         for jj in 0..BATCH_SIZE {
             indices[jj] = rng.gen_range(0, nbr_train_images);
         }
+
         let x_batch = data_set.train_images.select(Axis(0), &indices);
         let t_batch = data_set.train_labels.select(Axis(0), &indices);
 
