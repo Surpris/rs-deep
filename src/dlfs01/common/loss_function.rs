@@ -8,6 +8,8 @@ use super::util::cast_t2u;
 use num_traits::Float;
 use std::f64::consts::E;
 
+type Vec2d<T> = Vec<Vec<T>>;
+
 const EPS: f64 = 1E-8;
 
 pub trait LossFunc<T>
@@ -44,6 +46,30 @@ where
     }
     fn softmax_loss(&self, other: &Self) -> T {
         self.softmax().cross_entropy_error(other)
+    }
+}
+
+impl<T> LossFunc<T> for Vec2d<T>
+where
+    T: Float,
+{
+    fn sum_squared_error(&self, other: &Self) -> T {
+        (0..self.len())
+            .map(|ii| self[ii].sum_squared_error(&other[ii]))
+            .collect::<Vec<T>>()
+            .sum()
+    }
+    fn cross_entropy_error(&self, other: &Self) -> T {
+        -(0..self.len())
+            .map(|ii| self[ii].cross_entropy_error(&other[ii]))
+            .collect::<Vec<T>>()
+            .mean()
+    }
+    fn softmax_loss(&self, other: &Self) -> T {
+        (0..self.len())
+            .map(|ii| self[ii].softmax().cross_entropy_error(&other[ii]))
+            .collect::<Vec<T>>()
+            .sum()
     }
 }
 

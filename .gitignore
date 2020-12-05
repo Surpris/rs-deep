@@ -14,4 +14,6 @@ Cargo.lock
 
 /target
 
-# dded by user
+
+# Added by user
+/images

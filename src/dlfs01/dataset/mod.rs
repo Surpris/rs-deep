@@ -5,7 +5,8 @@
 #![allow(dead_code)]
 
 // use std::io::{BufReader};
-use crate::dlfs01::cast_t2u;
+use crate::dlfs01::{cast_t2u, Operators};
+use ndarray::{Array, Array2, ArrayD};
 use num_traits::{Num, NumCast};
 use std::fs::File;
 use std::io;
@@ -44,11 +45,84 @@ const IMG_SIZE: usize = 784;
 const IMG_MAX: u8 = 255;
 const NBR_CLASS: usize = 10;
 
+#[derive(Clone)]
+pub struct MNISTDataSetArray2<T> {
+    pub train_images: Array2<T>,
+    pub train_labels: Array2<T>,
+    pub test_images: Array2<T>,
+    pub test_labels: Array2<T>,
+}
+
+#[derive(Clone)]
+pub struct MNISTDataSetArrayD<T> {
+    pub train_images: ArrayD<T>,
+    pub train_labels: ArrayD<T>,
+    pub test_images: ArrayD<T>,
+    pub test_labels: ArrayD<T>,
+}
+
+#[derive(Clone)]
+pub struct MNISTDataSetFlattened<T> {
+    pub train_images: Vec2d<T>,
+    pub train_labels: Vec2d<T>,
+    pub test_images: Vec2d<T>,
+    pub test_labels: Vec2d<T>,
+}
+
+#[derive(Clone)]
 pub struct MNISTDataSet<T> {
-    train_images: Vec4d<T>,
-    train_labels: Vec2d<T>,
-    test_images: Vec4d<T>,
-    test_labels: Vec2d<T>,
+    pub train_images: Vec4d<T>,
+    pub train_labels: Vec2d<T>,
+    pub test_images: Vec4d<T>,
+    pub test_labels: Vec2d<T>,
+}
+
+impl<T> MNISTDataSet<T>
+where
+    T: Num + Copy + NumCast + PartialOrd,
+{
+    pub fn flatten(self) -> MNISTDataSetFlattened<T> {
+        let train_images: Vec2d<T> = self.train_images.iter().map(|v| v.flatten()).collect();
+        let train_labels = self.train_labels;
+        let test_images: Vec2d<T> = self.test_images.iter().map(|v| v.flatten()).collect();
+        let test_labels = self.test_labels;
+        MNISTDataSetFlattened {
+            train_images,
+            train_labels,
+            test_images,
+            test_labels,
+        }
+    }
+    pub fn into_array2(self) -> MNISTDataSetArray2<T> {
+        let img_size: usize = IMG_DIM.0 * IMG_DIM.1 * IMG_DIM.2;
+        let target_size = NBR_CLASS;
+        let train_images: Array2<T> = Array::from_shape_vec(
+            (self.train_images.len(), img_size),
+            self.train_images.flatten(),
+        )
+        .unwrap();
+        let train_labels: Array2<T> = Array::from_shape_vec(
+            (self.train_labels.len(), target_size),
+            self.train_labels.flatten(),
+        )
+        .unwrap();
+        let test_images: Array2<T> = Array::from_shape_vec(
+            (self.test_images.len(), img_size),
+            self.test_images.flatten(),
+        )
+        .unwrap();
+        let test_labels: Array2<T> = Array::from_shape_vec(
+            (self.test_labels.len(), target_size),
+            self.test_labels.flatten(),
+        )
+        .unwrap();
+        MNISTDataSetArray2 {
+            train_images,
+            train_labels,
+            test_images,
+            test_labels,
+        }
+    }
 }
 
 impl MNISTDataSet<u8> {
@@ -90,20 +164,28 @@ pub enum DataSetError {
     FileIOError(#[from] io::Error),
 }
 
-pub fn load_mnist() -> Result<MNISTDataSet<f32>, DataSetError> {
-    println!("load images for training...");
+pub fn load_mnist(verbose: u8) -> Result<MNISTDataSet<f32>, DataSetError> {
+    if verbose > 0u8 {
+        println!("load images for training...");
+    }
     let file_path = Path::new(MNIST_DIR).join(KEY_FILE[0].1);
     let train_images = load_images(&file_path)?;
 
-    println!("load labels for training...");
+    if verbose > 0u8 {
+        println!("load labels for training...");
+    }
     let file_path = Path::new(MNIST_DIR).join(KEY_FILE[1].1);
     let train_labels = load_labels(&file_path)?;
 
-    println!("load images for test...");
+    if verbose > 0u8 {
+        println!("load images for test...");
+    }
     let file_path = Path::new(MNIST_DIR).join(KEY_FILE[2].1);
     let test_images = load_images(&file_path)?;
 
-    println!("load labels for test...");
+    if verbose > 0u8 {
+        println!("load labels for test...");
+    }
     let file_path = Path::new(MNIST_DIR).join(KEY_FILE[3].1);
     let test_labels = load_labels(&file_path)?;
     let data_set: MNISTDataSet<u8> = MNISTDataSet {
@@ -202,7 +284,8 @@ where
 
 pub fn main() {
     println!("< dataset sub module >");
-    let data_set: MNISTDataSet<f32> = load_mnist().unwrap();
+    let verbose: u8 = 1u8;
+    let data_set: MNISTDataSet<f32> = load_mnist(verbose).unwrap();
     println!("train_labels: # = {}", data_set.train_labels.len());
     println!("First 10: {:?}", data_set.train_labels[..10].to_vec());
     println!("train_image: # = {}", data_set.train_images.len());
@@ -210,4 +293,13 @@ pub fn main() {
     for ii in 0..10 {
         print_image::<f32>(&data_set.train_images[ii]);
     }
+    println!("flatten the data set...");
+    let data_set = data_set.flatten();
+    println!(
+        "flattened data size of train and test: {} x {}, {} x {}",
+        data_set.train_images.len(),
+        data_set.train_images[0].len(),
+        data_set.test_images.len(),
+        data_set.test_images[0].len()
+    );
 }
