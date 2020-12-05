@@ -21,6 +21,8 @@ use ndarray_stats::QuantileExt;
 //     }};
 // }
 
+extern crate rs_deep;
+
 fn main() {
     // chapter 01
     // rs_deep::dlfs01::ch01::hungry::main();
