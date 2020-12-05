@@ -13,12 +13,13 @@ use crate::dlfs01::Operators;
 use ndarray::{Array, Array2, Axis};
 use plotters::prelude::*;
 use rand::prelude::*;
+use std::time::Instant;
 
 const HIDDEN_SIZE: usize = 50;
-const NBR_OF_ITERS: usize = 100;
+const NBR_OF_ITERS: usize = 10000;
 const BATCH_SIZE: usize = 100;
 const LEARNING_RATE: f32 = 0.1;
-const NBR_OF_TARGET_IMAGES: usize = 10000;
+const NBR_OF_TARGET_IMAGES: usize = 60000;
 
 struct TrainResult {
     train_loss_list: Vec<f32>,
@@ -45,8 +46,8 @@ pub fn main() {
     let data_set_flat: MNISTDataSetFlattened<f32> = MNISTDataSetFlattened {
         train_images: data_set_flat.train_images[..NBR_OF_TARGET_IMAGES].to_vec(),
         train_labels: data_set_flat.train_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
-        test_images: data_set_flat.test_images[..NBR_OF_TARGET_IMAGES].to_vec(),
-        test_labels: data_set_flat.test_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
+        test_images: data_set_flat.test_images,
+        test_labels: data_set_flat.test_labels,
     };
 
     let data_set: MNISTDataSetArray2<f32> = data_set_raw.into_array2();
@@ -55,14 +56,14 @@ pub fn main() {
     let data_set: MNISTDataSetArray2<f32> = MNISTDataSetArray2 {
         train_images: 1.0 * &data_set.train_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
         train_labels: 1.0 * &data_set.train_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
-        test_images: 1.0 * &data_set.test_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
-        test_labels: 1.0 * &data_set.test_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
+        test_images: data_set.test_images,
+        test_labels: data_set.test_labels,
     };
 
     // set a parameter for training
     let nbr_train_images: usize = data_set.train_images.len_of(Axis(0));
-    // let iter_per_epoch: usize = usize::max(nbr_train_images / BATCH_SIZE, 1);
-    let iter_per_epoch: usize = 10;
+    let iter_per_epoch: usize = usize::max(nbr_train_images / BATCH_SIZE, 1);
+    // let iter_per_epoch: usize = 10;
 
     // initialize a two-layer model
     println!("initialize a model...");
@@ -76,6 +77,7 @@ pub fn main() {
     // train loop
     let mut rng = thread_rng();
     println!("start training...");
+    let start = Instant::now();
     for ii in 0..NBR_OF_ITERS {
         // choose indices
         let mut indices: Vec<usize> = vec![0usize; BATCH_SIZE];
@@ -112,8 +114,8 @@ pub fn main() {
         train_result.train_loss_list.push(network.current_loss);
 
         // validation
-        if (ii + 1) % iter_per_epoch == 0 {
-            println!("train loss at step {}: {}", ii + 1, network.current_loss);
+        if ii % iter_per_epoch == 0 {
+            println!("train loss at step {}: {}", ii, network.current_loss);
             print!("validation: ");
             print!("train images... ");
             let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
@@ -123,12 +125,14 @@ pub fn main() {
             train_result.test_acc_list.push(test_acc);
             println!(
                 "acc at {} step: train={}, test={}",
-                ii + 1,
+                ii,
                 train_acc,
                 test_acc
             );
         }
     }
+    let end = start.elapsed();
+    println!("{}.{:03} sec elapsed to training.", end.as_secs(), end.subsec_millis());
     println!("training finished.");
 
     // plot result
