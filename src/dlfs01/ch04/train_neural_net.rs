@@ -15,16 +15,18 @@ use rand::prelude::*;
 
 type Vec2d<T> = Vec<Vec<T>>;
 
+type FF = f64;
+
 const HIDDEN_SIZE: usize = 50;
 const NBR_OF_ITERS: usize = 100;
 const BATCH_SIZE: usize = 100;
-const LEARNING_RATE: f32 = 0.1;
+const LEARNING_RATE: FF = 0.1;
 const NBR_OF_TARGET_IMAGES: usize = 10000;
 
 struct TrainResult {
-    train_loss_list: Vec<f32>,
-    train_acc_list: Vec<f32>,
-    test_acc_list: Vec<f32>,
+    train_loss_list: Vec<FF>,
+    train_acc_list: Vec<FF>,
+    test_acc_list: Vec<FF>,
 }
 
 impl TrainResult {
@@ -41,8 +43,8 @@ pub fn main() {
     println!("< train_neural_net sub module >");
     // load MNIST dataset
     println!("load MNIST dataset...");
-    let data_set: MNISTDataSetFlattened<f32> = load_mnist(0u8).unwrap().flatten();
-    let data_set: MNISTDataSetFlattened<f32> = MNISTDataSetFlattened {
+    let data_set: MNISTDataSetFlattened<FF> = load_mnist(0u8).unwrap().flatten();
+    let data_set: MNISTDataSetFlattened<FF> = MNISTDataSetFlattened {
         train_images: data_set.train_images[..NBR_OF_TARGET_IMAGES].to_vec(),
         train_labels: data_set.train_labels[..NBR_OF_TARGET_IMAGES].to_vec(),
         test_images: data_set.test_images[..NBR_OF_TARGET_IMAGES].to_vec(),
@@ -56,7 +58,7 @@ pub fn main() {
 
     // initialize a two-layer model
     println!("initialize a model...");
-    let mut network: TwoLayerNet<f32> = TwoLayerNet::new(
+    let mut network: TwoLayerNet<FF> = TwoLayerNet::new(
         data_set.train_images[0].len(),
         HIDDEN_SIZE,
         data_set.train_labels[0].len(),
@@ -77,8 +79,8 @@ pub fn main() {
             indices.push(rng.gen_range(0, nbr_train_images));
         }
         // choose batched data set
-        let x_batch: Vec2d<f32> = data_set.train_images.shuffle_copy_by_indices(&indices);
-        let t_batch: Vec2d<f32> = data_set.train_labels.shuffle_copy_by_indices(&indices);
+        let x_batch: Vec2d<FF> = data_set.train_images.shuffle_copy_by_indices(&indices);
+        let t_batch: Vec2d<FF> = data_set.train_labels.shuffle_copy_by_indices(&indices);
 
         // calculate gradient
         network.gradient_by_batch(&x_batch, &t_batch);
@@ -116,7 +118,7 @@ pub fn main() {
     println!("training finished.");
 
     // plot result
-    let x: Vec<f32> = arange(0.0, train_result.train_loss_list.len() as f32, 1.0);
+    let x: Vec<FF> = arange(0.0, train_result.train_loss_list.len() as FF, 1.0);
     assert_eq!(x.len(), train_result.train_loss_list.len());
     match plot(
         "./images/train_loss.png",
@@ -130,7 +132,7 @@ pub fn main() {
         Ok(_) => println!("ok"),
         Err(s) => println!("{}", s),
     }
-    let x: Vec<f32> = arange(0.0, train_result.train_acc_list.len() as f32, 1.0);
+    let x: Vec<FF> = arange(0.0, train_result.train_acc_list.len() as FF, 1.0);
     assert_eq!(x.len(), train_result.train_acc_list.len());
     match plot(
         "./images/train_acc.png",
@@ -162,8 +164,8 @@ fn plot(
     file_name: &str,
     height: u32,
     width: u32,
-    x: &[f32],
-    y: &[f32],
+    x: &[FF],
+    y: &[FF],
     label: &str,
     caption: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {

@@ -16,16 +16,18 @@ use plotters::prelude::*;
 use rand::prelude::*;
 use std::time::Instant;
 
+type FF = f64;
+
 const HIDDEN_SIZE: usize = 50;
 const NBR_OF_ITERS: usize = 10000;
 const BATCH_SIZE: usize = 100;
-const LEARNING_RATE: f32 = 0.1;
+const LEARNING_RATE: FF = 0.1;
 const NBR_OF_TARGET_IMAGES: usize = 60000;
 
 struct TrainResult {
-    train_loss_list: Vec<f32>,
-    train_acc_list: Vec<f32>,
-    test_acc_list: Vec<f32>,
+    train_loss_list: Vec<FF>,
+    train_acc_list: Vec<FF>,
+    test_acc_list: Vec<FF>,
 }
 
 impl TrainResult {
@@ -42,10 +44,10 @@ pub fn main() {
     println!("< ch05 train_neural_net sub module >");
     // load MNIST dataset
     println!("load MNIST dataset...");
-    let data_set: MNISTDataSetArray2<f32> = load_mnist(0u8).unwrap().into_array2();
+    let data_set: MNISTDataSetArray2<FF> = load_mnist(0u8).unwrap().into_array2();
     let input_size = data_set.train_images.len_of(Axis(1));
     let output_size = data_set.train_labels.len_of(Axis(1));
-    let data_set: MNISTDataSetArray2<f32> = MNISTDataSetArray2 {
+    let data_set: MNISTDataSetArray2<FF> = MNISTDataSetArray2 {
         train_images: 1.0 * &data_set.train_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
         train_labels: 1.0 * &data_set.train_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
         test_images: data_set.test_images,
@@ -58,7 +60,7 @@ pub fn main() {
 
     // initialize a two-layer model
     println!("initialize a model...");
-    let mut network: TwoLayerNet<f32> = TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size);
+    let mut network: TwoLayerNet<FF> = TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size);
     network.print_detail();
     network.verbose = false;
 
@@ -116,7 +118,7 @@ pub fn main() {
     println!("training finished.");
 
     // plot result
-    // let x: Vec<f32> = arange(0.0, train_result.train_loss_list.len() as f32, 1.0);
+    // let x: Vec<FF> = arange(0.0, train_result.train_loss_list.len() as FF, 1.0);
     // assert_eq!(x.len(), train_result.train_loss_list.len());
     // match plot(
     //     "./images/train_loss.png",
@@ -130,7 +132,7 @@ pub fn main() {
     //     Ok(_) => println!("ok"),
     //     Err(s) => println!("{}", s),
     // }
-    // let x: Vec<f32> = arange(0.0, train_result.train_acc_list.len() as f32, 1.0);
+    // let x: Vec<FF> = arange(0.0, train_result.train_acc_list.len() as FF, 1.0);
     // assert_eq!(x.len(), train_result.train_acc_list.len());
     // match plot(
     //     "./images/train_acc.png",
@@ -162,8 +164,8 @@ fn plot(
     file_name: &str,
     height: u32,
     width: u32,
-    x: &[f32],
-    y: &[f32],
+    x: &[FF],
+    y: &[FF],
     label: &str,
     caption: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
