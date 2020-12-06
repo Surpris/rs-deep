@@ -1,4 +1,4 @@
-//! base.rs
+//! layer_base.rs
 //!
 //! base traits for layers
 

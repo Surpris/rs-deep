@@ -6,7 +6,7 @@
 
 use super::super::math::sigmoid;
 use super::super::util::cast_t2u;
-use super::base::{LayerBase2, LayerBaseD};
+use super::layer_base::{LayerBase2, LayerBaseD};
 use ndarray::{Array2, ArrayD, Axis, IxDyn};
 use num_traits::Float;
 use rand::distributions::Uniform;

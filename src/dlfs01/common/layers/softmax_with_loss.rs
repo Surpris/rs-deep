@@ -3,7 +3,7 @@
 //! custom layer: combination of softmax and loss
 
 use super::super::util::cast_t2u;
-use super::base::{LossLayerBase2, LossLayerBaseD};
+use super::layer_base::{LossLayerBase2, LossLayerBaseD};
 use ndarray::{Array2, ArrayD, Axis, IxDyn};
 use num_traits::Float;
 use rand::distributions::Uniform;

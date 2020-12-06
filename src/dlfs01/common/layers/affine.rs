@@ -3,7 +3,7 @@
 //! Affine layer
 
 use super::super::util::cast_t2u;
-use super::base::LayerBase2;
+use super::layer_base::LayerBase2;
 use ndarray::{Array, Array1, Array2, Axis};
 use num_traits::Float;
 use rand::distributions::Uniform;
