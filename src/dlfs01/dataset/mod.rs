@@ -18,8 +18,8 @@ type Vec2d<T> = Vec<Vec<T>>;
 type Vec3d<T> = Vec<Vec2d<T>>;
 type Vec4d<T> = Vec<Vec3d<T>>;
 
-const MNIST_DIR: &str = "/home/user/rust/projects/data/mnist/";
-const LENA_DIR: &str = "/home/user/rust/projects/images/lena/";
+const MNIST_DIR: &str = "./data/mnist/";
+const LENA_DIR: &str = "./images/lena/";
 
 const URL_BASE: &str = "http://yann.lecun.com/exdb/mnist/";
 const KEY_FILE_GZ: [(&str, &str); 4] = [
