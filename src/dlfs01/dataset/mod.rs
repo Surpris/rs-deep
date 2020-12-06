@@ -134,6 +134,14 @@ impl MNISTDataSet<u8> {
             test_labels: to_f32_2d(self.test_labels, 1),
         }
     }
+    pub fn to_f64(self) -> MNISTDataSet<f64> {
+        MNISTDataSet::<f64> {
+            train_images: to_f64_4d(self.train_images, IMG_MAX),
+            train_labels: to_f64_2d(self.train_labels, 1),
+            test_images: to_f64_4d(self.test_images, IMG_MAX),
+            test_labels: to_f64_2d(self.test_labels, 1),
+        }
+    }
 }
 
 fn to_f32_1d(src: Vec<u8>, norm: u8) -> Vec<f32> {
@@ -156,6 +164,26 @@ fn to_f32_4d(src: Vec4d<u8>, norm: u8) -> Vec4d<f32> {
     src.iter().map(|v| to_f32_3d(v.clone(), norm)).collect()
 }
 
+fn to_f64_1d(src: Vec<u8>, norm: u8) -> Vec<f64> {
+    if norm == 1 {
+        src.iter().map(|&v| v as f64).collect()
+    } else {
+        src.iter().map(|&v| v as f64 / norm as f64).collect()
+    }
+}
+
+fn to_f64_2d(src: Vec2d<u8>, norm: u8) -> Vec2d<f64> {
+    src.iter().map(|v| to_f64_1d(v.clone(), norm)).collect()
+}
+
+fn to_f64_3d(src: Vec3d<u8>, norm: u8) -> Vec3d<f64> {
+    src.iter().map(|v| to_f64_2d(v.clone(), norm)).collect()
+}
+
+fn to_f64_4d(src: Vec4d<u8>, norm: u8) -> Vec4d<f64> {
+    src.iter().map(|v| to_f64_3d(v.clone(), norm)).collect()
+}
+
 #[derive(ThisError, Debug)]
 pub enum DataSetError {
     #[error("Index out of bound.")]
@@ -164,7 +192,7 @@ pub enum DataSetError {
     FileIOError(#[from] io::Error),
 }
 
-pub fn load_mnist(verbose: u8) -> Result<MNISTDataSet<f32>, DataSetError> {
+pub fn load_mnist(verbose: u8) -> Result<MNISTDataSet<f64>, DataSetError> {
     if verbose > 0u8 {
         println!("load images for training...");
     }
@@ -196,7 +224,7 @@ pub fn load_mnist(verbose: u8) -> Result<MNISTDataSet<f32>, DataSetError> {
     };
 
     println!("converting into f32...");
-    Ok(data_set.to_f32())
+    Ok(data_set.to_f64())
 }
 
 pub fn load_images(file_path: &Path) -> Result<Vec4d<u8>, DataSetError> {
@@ -285,13 +313,13 @@ where
 pub fn main() {
     println!("< dataset sub module >");
     let verbose: u8 = 1u8;
-    let data_set: MNISTDataSet<f32> = load_mnist(verbose).unwrap();
+    let data_set: MNISTDataSet<f64> = load_mnist(verbose).unwrap();
     println!("train_labels: # = {}", data_set.train_labels.len());
     println!("First 10: {:?}", data_set.train_labels[..10].to_vec());
     println!("train_image: # = {}", data_set.train_images.len());
     println!("First 10:");
     for ii in 0..10 {
-        print_image::<f32>(&data_set.train_images[ii]);
+        print_image::<f64>(&data_set.train_images[ii]);
     }
     println!("flatten the data set...");
     let data_set = data_set.flatten();
