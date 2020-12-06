@@ -3,19 +3,20 @@
 //! Affine layer
 
 use super::super::util::cast_t2u;
+use super::base::LayerBase2;
 use ndarray::{Array, Array1, Array2, Axis};
 use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
 
 /// Affine layer trait
-pub trait AffineBase<T> {
-    // fn new(shape: &(usize, usize)) -> Self;
-    fn forward(&mut self, x: &Array2<T>) -> Array2<T>;
-    fn backward(&mut self, dx: &Array2<T>) -> Array2<T>;
-    fn update(&mut self, lr: T);
-    fn print_detail(&self);
-}
+// pub trait AffineBase<T> {
+//     // fn new(shape: &(usize, usize)) -> Self;
+//     fn forward(&mut self, x: &Array2<T>) -> Array2<T>;
+//     fn backward(&mut self, dx: &Array2<T>) -> Array2<T>;
+//     fn update(&mut self, lr: T);
+//     fn print_detail(&self);
+// }
 
 /// Affine layer
 pub struct Affine<T> {
@@ -53,7 +54,7 @@ where
     }
 }
 
-impl<T: 'static> AffineBase<T> for Affine<T>
+impl<T: 'static> LayerBase2<T> for Affine<T>
 where
     T: Float,
 {

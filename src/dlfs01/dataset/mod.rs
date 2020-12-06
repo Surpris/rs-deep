@@ -223,7 +223,7 @@ pub fn load_mnist(verbose: u8) -> Result<MNISTDataSet<f64>, DataSetError> {
         test_labels,
     };
 
-    println!("converting into f32...");
+    // println!("converting into f32...");
     Ok(data_set.to_f64())
 }
 
