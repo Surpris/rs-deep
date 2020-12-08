@@ -4,8 +4,7 @@
 
 use crate::dlfs01::cast_t2u;
 use crate::dlfs01::common::layers::*;
-use ndarray::{Array, Array2, Axis};
-// use ndarray::{Ix2, IxDyn};
+use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
 use num_traits::Float;
 
@@ -35,9 +34,9 @@ where
 {
     pub fn new(input_size: usize, hidden_size: usize, output_size: usize) -> Self {
         TwoLayerNet {
-            affine1: Affine::new(&(input_size, hidden_size)),
-            activator: ReLU2::new(&[hidden_size, hidden_size]),
-            affine2: Affine::new(&(hidden_size, output_size)),
+            affine1: Affine::new((input_size, hidden_size)),
+            activator: ReLU2::new((hidden_size, hidden_size)),
+            affine2: Affine::new((hidden_size, output_size)),
             loss_layer: SoftmaxWithLoss2::new(&[output_size, output_size]),
             verbose: false,
             current_loss: cast_t2u(0.0),
@@ -53,12 +52,6 @@ where
         let y = self.affine1.forward(&x);
         let y = self.activator.forward(&y);
         let y = self.affine2.forward(&y);
-        // let y = self
-        //     .activator
-        //     .forward(&y.into_dimensionality::<IxDyn>().unwrap());
-        // let y = self
-        //     .affine2
-        //     .forward(&y.into_dimensionality::<Ix2>().unwrap());
         y
     }
     fn predict(&mut self, x: &Array2<T>) -> Array2<T> {
@@ -74,10 +67,6 @@ where
     fn loss(&mut self, x: &Array2<T>, t: &Array2<T>) -> T {
         let y = self.predict_prob(&x);
         self.current_loss = self.loss_layer.forward(&y, &t);
-        // self.current_loss = self.loss_layer.forward(
-        //     &y.into_dimensionality::<IxDyn>().unwrap(),
-        //     &t.clone().into_dimensionality::<IxDyn>().unwrap(),
-        // );
         self.current_loss
     }
     fn accuracy(&mut self, x: &Array2<T>, t: &Array2<T>) -> T {
@@ -102,15 +91,6 @@ where
         let dx = self.affine2.backward(&dx);
         let dx = self.activator.backward(&dx);
         let _dx = self.affine1.backward(&dx);
-        // let dx = self
-        //     .affine2
-        //     .backward(&dx.into_dimensionality::<Ix2>().unwrap());
-        // let dx = self
-        //     .activator
-        //     .backward(&dx.into_dimensionality::<IxDyn>().unwrap());
-        // let _dx = self
-        //     .affine1
-        //     .backward(&dx.into_dimensionality::<Ix2>().unwrap());
     }
     fn update(&mut self, x: &Array2<T>, t: &Array2<T>, lr: T) {
         self.gradient(&x, &t);
