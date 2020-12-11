@@ -2,20 +2,14 @@
 //!
 //! Affine layer
 
+#![allow(unused_imports)]
+
 use super::super::util::cast_t2u;
-use ndarray::{Array, Array1, Array2, Axis};
+use super::layer_base::LayerBase;
+use ndarray::{Array, Array1, Array2, Axis, Ix2};
 use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
-
-/// Affine layer trait
-pub trait AffineBase<T> {
-    // fn new(shape: &(usize, usize)) -> Self;
-    fn forward(&mut self, x: &Array2<T>) -> Array2<T>;
-    fn backward(&mut self, dx: &Array2<T>) -> Array2<T>;
-    fn update(&mut self, lr: T);
-    fn print_detail(&self);
-}
 
 /// Affine layer
 pub struct Affine<T> {
@@ -30,15 +24,15 @@ impl<T> Affine<T>
 where
     T: Float,
 {
-    pub fn new(shape: &(usize, usize)) -> Self {
+    pub fn new(shape: (usize, usize)) -> Self {
         let mut rng = rand::thread_rng();
         let gen = Uniform::new(-1.0f32, 1.0f32);
         Affine {
-            weight: Array2::<T>::ones(*shape).map(|_| cast_t2u(gen.sample(&mut rng))),
+            weight: Array2::<T>::ones(shape).map(|_| cast_t2u(gen.sample(&mut rng))),
             bias: Array1::<T>::ones(shape.1).map(|_| cast_t2u(gen.sample(&mut rng))),
-            dw: Array2::<T>::ones(*shape),
+            dw: Array2::<T>::ones(shape),
             db: Array1::<T>::ones(shape.1),
-            buff: Array2::<T>::ones(*shape),
+            buff: Array2::<T>::ones(shape),
         }
     }
     pub fn from(weight: &Array2<T>, bias: &Array1<T>) -> Self {
@@ -53,7 +47,7 @@ where
     }
 }
 
-impl<T: 'static> AffineBase<T> for Affine<T>
+impl<T: 'static> LayerBase<T, Ix2> for Affine<T>
 where
     T: Float,
 {
