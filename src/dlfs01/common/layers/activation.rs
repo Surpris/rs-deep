@@ -37,147 +37,40 @@ where
     }
 }
 
+impl<T: 'static, D> LayerBase<T, D> for ReLU<T, D>
+where
+    T: Float,
+    D: Dimension,
+{
+    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D> {
+        if self.mask.shape() != x.shape() {
+            self.mask = Array::<u8, D>::zeros(x.raw_dim());
+        }
+        let zero: T = cast_t2u(0.0);
+        self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
+        x.map(|&v| if v <= zero { zero } else { v })
+    }
+    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D> {
+        let zero: T = cast_t2u(0.0);
+        let mut dst = dx.clone();
+        for (v, d) in self.mask.iter().zip(dst.iter_mut()) {
+            if *v != 0u8 {
+                *d = zero;
+            }
+        }
+        dst
+    }
+    fn print_detail(&self) {
+        println!("ReLU activation layer.");
+    }
+}
+
 pub type ReLU2<T> = ReLU<T, Ix2>;
 pub type ReLU3<T> = ReLU<T, Ix3>;
 pub type ReLU4<T> = ReLU<T, Ix4>;
 pub type ReLU5<T> = ReLU<T, Ix5>;
-// pub type ReLU6<T> = ReLU<T, Ix6>;
+pub type ReLU6<T> = ReLU<T, Ix6>;
 pub type ReLUD<T> = ReLU<T, IxDyn>;
-
-impl<T: 'static> LayerBase<T, Ix2> for ReLU2<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
-        if self.mask.shape() != x.shape() {
-            self.mask = Array2::<u8>::zeros((x.shape()[0], x.shape()[1]));
-        }
-        let zero: T = cast_t2u(0.0);
-        self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
-        x.map(|&v| if v <= zero { zero } else { v })
-    }
-    fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = dx.clone();
-        for v in self.mask.indexed_iter() {
-            if *v.1 != 0u8 {
-                dst[v.0] = zero;
-            }
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("ReLU activation layer.");
-    }
-}
-
-impl<T: 'static> LayerBase<T, Ix3> for ReLU3<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array3<T>) -> Array3<T> {
-        if self.mask.shape() != x.shape() {
-            self.mask = Array3::<u8>::zeros(x.raw_dim());
-        }
-        let zero: T = cast_t2u(0.0);
-        self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
-        x.map(|&v| if v <= zero { zero } else { v })
-    }
-    fn backward(&mut self, dx: &Array3<T>) -> Array3<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = dx.clone();
-        for v in self.mask.indexed_iter() {
-            if *v.1 != 0u8 {
-                dst[v.0] = zero;
-            }
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("ReLU activation layer.");
-    }
-}
-
-impl<T: 'static> LayerBase<T, Ix4> for ReLU4<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array4<T>) -> Array4<T> {
-        if self.mask.shape() != x.shape() {
-            self.mask = Array4::<u8>::zeros(x.raw_dim());
-        }
-        let zero: T = cast_t2u(0.0);
-        self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
-        x.map(|&v| if v <= zero { zero } else { v })
-    }
-    fn backward(&mut self, dx: &Array4<T>) -> Array4<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = dx.clone();
-        for v in self.mask.indexed_iter() {
-            if *v.1 != 0u8 {
-                dst[v.0] = zero;
-            }
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("ReLU activation layer.");
-    }
-}
-
-impl<T: 'static> LayerBase<T, Ix5> for ReLU5<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array5<T>) -> Array5<T> {
-        if self.mask.shape() != x.shape() {
-            self.mask = Array5::<u8>::zeros(x.raw_dim());
-        }
-        let zero: T = cast_t2u(0.0);
-        self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
-        x.map(|&v| if v <= zero { zero } else { v })
-    }
-    fn backward(&mut self, dx: &Array5<T>) -> Array5<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = dx.clone();
-        for v in self.mask.indexed_iter() {
-            if *v.1 != 0u8 {
-                dst[v.0] = zero;
-            }
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("ReLU activation layer.");
-    }
-}
-
-impl<T: 'static> LayerBase<T, IxDyn> for ReLUD<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
-        if self.mask.shape() != x.shape() {
-            self.mask = ArrayD::<u8>::zeros(x.raw_dim());
-        }
-        let zero: T = cast_t2u(0.0);
-        self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
-        x.map(|&v| if v <= zero { zero } else { v })
-    }
-    fn backward(&mut self, dx: &ArrayD<T>) -> ArrayD<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = dx.clone();
-        for v in self.mask.indexed_iter() {
-            if *v.1 != 0u8 {
-                dst[v.0] = zero;
-            }
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("ReLU activation layer.");
-    }
-}
 
 // <<<<<<<<<<<<< ReLU layer <<<<<<<<<<<<<
 
@@ -321,7 +214,7 @@ where
 
 /// Arbitrary-D sigmoid layer
 pub struct Softmax<T, D> {
-    output: Array<T, D>,
+    pub output: Array<T, D>,
     axis: usize,
 }
 
@@ -347,24 +240,6 @@ pub type Softmax4<T> = Softmax<T, Ix4>;
 pub type Softmax5<T> = Softmax<T, Ix5>;
 pub type Softmax6<T> = Softmax<T, Ix6>;
 pub type SoftmaxD<T> = Softmax<T, IxDyn>;
-
-/// Dynamic-D softmax layer
-// pub struct Softmax2<T> {
-//     output: Array2<T>,
-//     axis: usize,
-// }
-
-// impl<T: 'static> Softmax2<T>
-// where
-//     T: Float,
-// {
-//     pub fn new(shape: &[usize], axis: usize) -> Self {
-//         Softmax2 {
-//             output: Array2::<T>::zeros((shape[0], shape[1])),
-//             axis,
-//         }
-//     }
-// }
 
 impl<T: 'static> LayerBase<T, Ix2> for Softmax2<T>
 where

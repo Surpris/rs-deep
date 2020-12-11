@@ -37,7 +37,7 @@ where
             affine1: Affine::new((input_size, hidden_size)),
             activator: ReLU2::new((hidden_size, hidden_size)),
             affine2: Affine::new((hidden_size, output_size)),
-            loss_layer: SoftmaxWithLoss2::new(&[output_size, output_size]),
+            loss_layer: SoftmaxWithLoss2::new((output_size, output_size)),
             verbose: false,
             current_loss: cast_t2u(0.0),
         }
