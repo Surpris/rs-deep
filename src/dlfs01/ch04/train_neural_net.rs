@@ -6,7 +6,7 @@
 
 use super::two_layer_net::{Model, TwoLayerNet};
 use crate::dlfs01::common::choice::Choice;
-use crate::dlfs01::dataset::{load_mnist, MNISTDataSetFlattened};
+use crate::dlfs01::dataset::mnist_vec::{load_mnist, MNISTDataSetFlattened};
 use crate::dlfs01::math::arange;
 use crate::dlfs01::MathFunc;
 use crate::dlfs01::Operators;

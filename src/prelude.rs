@@ -42,5 +42,8 @@ pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::util::cast_t2u;
 
+// #[doc(no_inline)]
+// pub use crate::dlfs01::dataset::{DataSetError, MNISTDataSet, MNISTDataSetArray2};
+
 #[doc(no_inline)]
-pub use crate::dlfs01::dataset::{DataSetError, MNISTDataSet, MNISTDataSetArray2};
+pub use crate::dlfs01::dataset::mnist::{MNISTDataSet2, MNISTDataSet4};
