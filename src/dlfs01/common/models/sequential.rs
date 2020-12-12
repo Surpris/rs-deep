@@ -12,7 +12,7 @@ use num_traits::Float;
 
 use super::super::{layers::LayerBase, optimizers::OptimizerBase};
 
-/// Affine layer
+/// Sequential model
 pub struct Sequential<'a, T, D, L, O> {
     pub params: HashMap<&'a str, L>,
     pub grads: HashMap<&'a str, L>,

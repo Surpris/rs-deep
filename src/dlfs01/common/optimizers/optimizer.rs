@@ -1,11 +1,12 @@
-//! sgd
+//! optimizer
 //!
-//! stochastic gradient descent
+//! optimizer struct
 
 use super::optimizer_base::OptimizerBase;
 use ndarray::prelude::*;
 use num_traits::Float;
 
+/// stochastic gradient descent
 pub struct SGD<T> {
     lr: T,
 }

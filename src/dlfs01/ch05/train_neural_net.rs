@@ -47,6 +47,7 @@ pub fn main() {
     let data_set: MNISTDataSetArray2<FF> = load_mnist(0u8).unwrap().into_array2();
     let input_size = data_set.train_images.len_of(Axis(1));
     let output_size = data_set.train_labels.len_of(Axis(1));
+    let batch_axis: usize = 0;
     let data_set: MNISTDataSetArray2<FF> = MNISTDataSetArray2 {
         train_images: 1.0 * &data_set.train_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
         train_labels: 1.0 * &data_set.train_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
@@ -60,7 +61,8 @@ pub fn main() {
 
     // initialize a two-layer model
     println!("initialize a model...");
-    let mut network: TwoLayerNet<FF> = TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size);
+    let mut network: TwoLayerNet<FF> =
+        TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size, batch_axis);
     network.print_detail();
     network.verbose = false;
 

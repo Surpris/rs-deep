@@ -32,12 +32,17 @@ impl<T: 'static> TwoLayerNet<T>
 where
     T: Float,
 {
-    pub fn new(input_size: usize, hidden_size: usize, output_size: usize) -> Self {
+    pub fn new(
+        input_size: usize,
+        hidden_size: usize,
+        output_size: usize,
+        batch_axis: usize,
+    ) -> Self {
         TwoLayerNet {
             affine1: Affine::new((input_size, hidden_size)),
             activator: ReLU2::new((hidden_size, hidden_size)),
             affine2: Affine::new((hidden_size, output_size)),
-            loss_layer: SoftmaxWithLoss2::new((output_size, output_size)),
+            loss_layer: SoftmaxWithLoss2::new((output_size, output_size), batch_axis),
             verbose: false,
             current_loss: cast_t2u(0.0),
         }
@@ -109,7 +114,7 @@ where
 
 pub fn main() {
     println!("< ch05 two_layer_net sub module >");
-    let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3);
+    let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3, 0);
     net.print_detail();
     let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();
     let t: Array2<f32> = Array::from_shape_vec((1, 3), vec![0.0, 0.0, 1.0]).unwrap();

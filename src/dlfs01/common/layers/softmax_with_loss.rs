@@ -8,8 +8,8 @@ use super::layer_base::*;
 use itertools::multizip;
 use ndarray::{prelude::*, RemoveAxis};
 use num_traits::Float;
-use rand::distributions::Uniform;
-use rand::prelude::*;
+// use rand::distributions::Uniform;
+// use rand::prelude::*;
 use std::f64::consts::E;
 
 const EPS: f64 = 1E-8;
@@ -17,6 +17,7 @@ const EPS: f64 = 1E-8;
 /// Arbitrary-D softmax-with-loss layer
 pub struct SoftmaxWithLoss<T, D> {
     pub output: Array<T, D>,
+    axis: usize,
     target: Array<T, D>,
     loss: T,
 }
@@ -26,13 +27,14 @@ where
     T: Float,
     D: Dimension,
 {
-    pub fn new<Sh>(shape: Sh) -> Self
+    pub fn new<Sh>(shape: Sh, axis: usize) -> Self
     where
         Sh: ShapeBuilder<Dim = D>,
     {
         let zeros = Array::<T, D>::zeros(shape);
         Self {
             output: zeros.clone(),
+            axis,
             target: zeros,
             loss: cast_t2u(0.0),
         }
@@ -51,7 +53,7 @@ where
         let batch_size: T = cast_t2u(x.len_of(Axis(0)));
 
         self.output = x.clone();
-        for mut view in self.output.axis_iter_mut(Axis(0)) {
+        for mut view in self.output.axis_iter_mut(Axis(self.axis)) {
             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
             view.mapv_inplace(|v| T::exp(v - v_max));
             let v_exp_sum = view.sum();
@@ -85,25 +87,3 @@ pub type SoftmaxWithLoss4<T> = SoftmaxWithLoss<T, Ix4>;
 pub type SoftmaxWithLoss5<T> = SoftmaxWithLoss<T, Ix5>;
 pub type SoftmaxWithLoss6<T> = SoftmaxWithLoss<T, Ix6>;
 pub type SoftmaxWithLossD<T> = SoftmaxWithLoss<T, IxDyn>;
-
-pub fn main() {
-    println!("< softmax-with-loss sub module >");
-    let mut rng = rand::thread_rng();
-    let gen = Uniform::new(-1.0f32, 1.0f32);
-
-    let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
-    let a = a.map(|_| gen.sample(&mut rng));
-
-    let mut t = ArrayD::<f32>::zeros(IxDyn(a.shape()));
-    t[[0, 0]] = 1.0;
-    t[[1, 1]] = 1.0;
-
-    println!("softmax-with-loss layer");
-    let mut layer: SoftmaxWithLossD<f32> = SoftmaxWithLossD::<f32>::new(a.shape());
-    let b = layer.forward(&a, &t);
-    println!("a: {}", a);
-    println!("t: {}", t);
-    println!("output: {}", layer.output);
-    println!("forward (loss): {}", b);
-    println!("backward: {}", layer.backward(1.0));
-}
