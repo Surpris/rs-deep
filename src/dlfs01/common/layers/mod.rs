@@ -12,7 +12,7 @@ pub use activation::{
     Sigmoid5, SigmoidD, Softmax, Softmax2, Softmax3, Softmax4, Softmax5, Softmax6, SoftmaxD,
 };
 pub use affine::Affine;
-pub use layer_base::*;
+pub use layer_base::{LayerBase, LossLayerBase};
 pub use softmax_with_loss::{
     SoftmaxWithLoss, SoftmaxWithLoss2, SoftmaxWithLoss3, SoftmaxWithLoss4, SoftmaxWithLoss5,
     SoftmaxWithLoss6, SoftmaxWithLossD,

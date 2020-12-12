@@ -47,12 +47,6 @@ fn main() {
     // rs_deep::dlfs01::ch05::two_layer_net::main();
     rs_deep::dlfs01::ch05::train_neural_net::main();
 
-    // commom
-    // rs_deep::dlfs01::common::loss_function::main();
-    // rs_deep::dlfs01::common::layers::activation::main();
-    // rs_deep::dlfs01::common::layers::affine::main();
-    // rs_deep::dlfs01::common::layers::softmax_with_loss::main();
-
     // dataset
     // rs_deep::dlfs01::dataset::main();
 

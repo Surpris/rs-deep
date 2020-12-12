@@ -79,29 +79,3 @@ where
         println!("bias shape: {:?}", self.bias.shape());
     }
 }
-
-pub fn main() {
-    println!("< affine sub module> ");
-    let mut rng = rand::thread_rng();
-    let gen = Uniform::new(-1.0f32, 1.0f32);
-
-    let input_shape: (usize, usize) = (2, 3);
-    let a: Array2<f32> =
-        Array::from_shape_vec(input_shape, vec![1.0, 1.0, 1.0, 2.0, 2.0, 2.0]).unwrap();
-
-    let affine_shape = (input_shape.1, 2);
-    let w: Array2<f32> =
-        Array::from_shape_vec(affine_shape, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
-    let b: Array1<f32> = Array::linspace(1.0, 3.0, affine_shape.1);
-    let mut layer = Affine::<f32>::from(&w, &b);
-    layer.print_detail();
-
-    let y = layer.forward(&a);
-
-    let output_shape = (input_shape.0, affine_shape.1);
-    let da = Array2::<f32>::zeros(output_shape).map(|_| gen.sample(&mut rng));
-    println!("a: {}", a);
-    println!("affine forward: {}", y);
-    println!("da: {}", da);
-    println!("affine backward: {}", layer.backward(&da));
-}

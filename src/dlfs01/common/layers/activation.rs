@@ -4,13 +4,13 @@
 
 #![allow(unused_variables)]
 
-use super::super::math::sigmoid;
+// use super::super::math::sigmoid;
 use super::super::util::cast_t2u;
 use super::layer_base::LayerBase;
-use ndarray::prelude::*;
+use ndarray::{prelude::*, RemoveAxis};
 use num_traits::Float;
-use rand::distributions::Uniform;
-use rand::prelude::*;
+// use rand::distributions::Uniform;
+// use rand::prelude::*;
 use std::marker::PhantomData;
 
 // >>>>>>>>>>>>> ReLU layer >>>>>>>>>>>>>
@@ -96,117 +96,140 @@ where
     }
 }
 
+impl<T: 'static, D> LayerBase<T, D> for Sigmoid<T, D>
+where
+    T: Float,
+    D: Dimension,
+{
+    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D> {
+        let one: T = cast_t2u(1.0);
+        self.output = x.map(|&v| one / (one + T::exp(-v)));
+        self.output.clone()
+    }
+    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D> {
+        let one: T = cast_t2u(1.0);
+        let mut dst = dx.clone();
+        for (v, d) in self.output.iter().zip(dst.iter_mut()) {
+            *d = *v * (one - *v) * *v;
+        }
+        dst
+    }
+    fn print_detail(&self) {
+        println!("sigmoid activation layer.");
+    }
+}
+
 pub type Sigmoid2<T> = Sigmoid<T, Ix2>;
 pub type Sigmoid3<T> = Sigmoid<T, Ix3>;
 pub type Sigmoid4<T> = Sigmoid<T, Ix4>;
 pub type Sigmoid5<T> = Sigmoid<T, Ix5>;
-// pub type Sigmoid6<T> = Sigmoid<T, Ix6>;
+pub type Sigmoid6<T> = Sigmoid<T, Ix6>;
 pub type SigmoidD<T> = Sigmoid<T, IxDyn>;
 
-impl<T: 'static> LayerBase<T, Ix2> for Sigmoid2<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
-        self.output = x.map(|&v| sigmoid(v));
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
-        let one: T = cast_t2u(1.0);
-        let mut dst = dx.clone();
-        for v in self.output.indexed_iter() {
-            dst[v.0] = *v.1 * (one - *v.1) * *v.1;
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("sigmoid activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix2> for Sigmoid2<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
+//         self.output = x.map(|&v| sigmoid(v));
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
+//         let one: T = cast_t2u(1.0);
+//         let mut dst = dx.clone();
+//         for v in self.output.indexed_iter() {
+//             dst[v.0] = *v.1 * (one - *v.1) * *v.1;
+//         }
+//         dst
+//     }
+//     fn print_detail(&self) {
+//         println!("sigmoid activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix3> for Sigmoid3<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array3<T>) -> Array3<T> {
-        self.output = x.map(|&v| sigmoid(v));
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array3<T>) -> Array3<T> {
-        let one: T = cast_t2u(1.0);
-        let mut dst = dx.clone();
-        for v in self.output.indexed_iter() {
-            dst[v.0] = *v.1 * (one - *v.1) * *v.1;
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("sigmoid activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix3> for Sigmoid3<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array3<T>) -> Array3<T> {
+//         self.output = x.map(|&v| sigmoid(v));
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array3<T>) -> Array3<T> {
+//         let one: T = cast_t2u(1.0);
+//         let mut dst = dx.clone();
+//         for v in self.output.indexed_iter() {
+//             dst[v.0] = *v.1 * (one - *v.1) * *v.1;
+//         }
+//         dst
+//     }
+//     fn print_detail(&self) {
+//         println!("sigmoid activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix4> for Sigmoid4<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array4<T>) -> Array4<T> {
-        self.output = x.map(|&v| sigmoid(v));
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array4<T>) -> Array4<T> {
-        let one: T = cast_t2u(1.0);
-        let mut dst = dx.clone();
-        for v in self.output.indexed_iter() {
-            dst[v.0] = *v.1 * (one - *v.1) * *v.1;
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("sigmoid activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix4> for Sigmoid4<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array4<T>) -> Array4<T> {
+//         self.output = x.map(|&v| sigmoid(v));
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array4<T>) -> Array4<T> {
+//         let one: T = cast_t2u(1.0);
+//         let mut dst = dx.clone();
+//         for v in self.output.indexed_iter() {
+//             dst[v.0] = *v.1 * (one - *v.1) * *v.1;
+//         }
+//         dst
+//     }
+//     fn print_detail(&self) {
+//         println!("sigmoid activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix5> for Sigmoid5<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array5<T>) -> Array5<T> {
-        self.output = x.map(|&v| sigmoid(v));
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array5<T>) -> Array5<T> {
-        let one: T = cast_t2u(1.0);
-        let mut dst = dx.clone();
-        for v in self.output.indexed_iter() {
-            dst[v.0] = *v.1 * (one - *v.1) * *v.1;
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("sigmoid activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix5> for Sigmoid5<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array5<T>) -> Array5<T> {
+//         self.output = x.map(|&v| sigmoid(v));
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array5<T>) -> Array5<T> {
+//         let one: T = cast_t2u(1.0);
+//         let mut dst = dx.clone();
+//         for v in self.output.indexed_iter() {
+//             dst[v.0] = *v.1 * (one - *v.1) * *v.1;
+//         }
+//         dst
+//     }
+//     fn print_detail(&self) {
+//         println!("sigmoid activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, IxDyn> for SigmoidD<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
-        self.output = x.map(|&v| sigmoid(v));
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &ArrayD<T>) -> ArrayD<T> {
-        let one: T = cast_t2u(1.0);
-        let mut dst = dx.clone();
-        for v in self.output.indexed_iter() {
-            dst[v.0] = *v.1 * (one - *v.1) * *v.1;
-        }
-        dst
-    }
-    fn print_detail(&self) {
-        println!("sigmoid activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, IxDyn> for SigmoidD<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
+//         self.output = x.map(|&v| sigmoid(v));
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &ArrayD<T>) -> ArrayD<T> {
+//         let one: T = cast_t2u(1.0);
+//         let mut dst = dx.clone();
+//         for v in self.output.indexed_iter() {
+//             dst[v.0] = *v.1 * (one - *v.1) * *v.1;
+//         }
+//         dst
+//     }
+//     fn print_detail(&self) {
+//         println!("sigmoid activation layer.");
+//     }
+// }
 
 // <<<<<<<<<<<<< Sigmoid layer <<<<<<<<<<<<<
 
@@ -234,6 +257,33 @@ where
     }
 }
 
+impl<T: 'static, D> LayerBase<T, D> for Softmax<T, D>
+where
+    T: Float,
+    D: Dimension + RemoveAxis,
+{
+    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D> {
+        let zero: T = cast_t2u(0.0);
+        let batch_size: T = cast_t2u(x.len_of(Axis(0)));
+
+        self.output = x.clone();
+        for mut view in self.output.axis_iter_mut(Axis(self.axis)) {
+            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+            view.mapv_inplace(|v| T::exp(v - v_max));
+            let v_exp_sum = view.sum();
+            view.mapv_inplace(|v| v / v_exp_sum);
+        }
+        self.output.clone()
+    }
+    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D> {
+        // TODO: correct implementation
+        dx.clone()
+    }
+    fn print_detail(&self) {
+        println!("softmax activation layer.");
+    }
+}
+
 pub type Softmax2<T> = Softmax<T, Ix2>;
 pub type Softmax3<T> = Softmax<T, Ix3>;
 pub type Softmax4<T> = Softmax<T, Ix4>;
@@ -241,190 +291,154 @@ pub type Softmax5<T> = Softmax<T, Ix5>;
 pub type Softmax6<T> = Softmax<T, Ix6>;
 pub type SoftmaxD<T> = Softmax<T, IxDyn>;
 
-impl<T: 'static> LayerBase<T, Ix2> for Softmax2<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
-            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
-            view.mapv_inplace(|v| T::exp(v - v_max));
-            let v_exp_sum = view.sum();
-            view.mapv_inplace(|v| v / v_exp_sum);
-        }
-        self.output = dst;
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
-        // TODO: correct implementation
-        dx.clone()
-    }
-    fn print_detail(&self) {
-        println!("softmax activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix2> for Softmax2<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
+//         let zero: T = cast_t2u(0.0);
+//         let mut dst = x.clone();
+//         for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+//             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+//             view.mapv_inplace(|v| T::exp(v - v_max));
+//             let v_exp_sum = view.sum();
+//             view.mapv_inplace(|v| v / v_exp_sum);
+//         }
+//         self.output = dst;
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
+//         // TODO: correct implementation
+//         dx.clone()
+//     }
+//     fn print_detail(&self) {
+//         println!("softmax activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix3> for Softmax3<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array3<T>) -> Array3<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
-            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
-            view.mapv_inplace(|v| T::exp(v - v_max));
-            let v_exp_sum = view.sum();
-            view.mapv_inplace(|v| v / v_exp_sum);
-        }
-        self.output = dst;
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array3<T>) -> Array3<T> {
-        // TODO: correct implementation
-        dx.clone()
-    }
-    fn print_detail(&self) {
-        println!("softmax activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix3> for Softmax3<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array3<T>) -> Array3<T> {
+//         let zero: T = cast_t2u(0.0);
+//         let mut dst = x.clone();
+//         for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+//             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+//             view.mapv_inplace(|v| T::exp(v - v_max));
+//             let v_exp_sum = view.sum();
+//             view.mapv_inplace(|v| v / v_exp_sum);
+//         }
+//         self.output = dst;
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array3<T>) -> Array3<T> {
+//         // TODO: correct implementation
+//         dx.clone()
+//     }
+//     fn print_detail(&self) {
+//         println!("softmax activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix4> for Softmax4<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array4<T>) -> Array4<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
-            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
-            view.mapv_inplace(|v| T::exp(v - v_max));
-            let v_exp_sum = view.sum();
-            view.mapv_inplace(|v| v / v_exp_sum);
-        }
-        self.output = dst;
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array4<T>) -> Array4<T> {
-        // TODO: correct implementation
-        dx.clone()
-    }
-    fn print_detail(&self) {
-        println!("softmax activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix4> for Softmax4<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array4<T>) -> Array4<T> {
+//         let zero: T = cast_t2u(0.0);
+//         let mut dst = x.clone();
+//         for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+//             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+//             view.mapv_inplace(|v| T::exp(v - v_max));
+//             let v_exp_sum = view.sum();
+//             view.mapv_inplace(|v| v / v_exp_sum);
+//         }
+//         self.output = dst;
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array4<T>) -> Array4<T> {
+//         // TODO: correct implementation
+//         dx.clone()
+//     }
+//     fn print_detail(&self) {
+//         println!("softmax activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix5> for Softmax5<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array5<T>) -> Array5<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
-            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
-            view.mapv_inplace(|v| T::exp(v - v_max));
-            let v_exp_sum = view.sum();
-            view.mapv_inplace(|v| v / v_exp_sum);
-        }
-        self.output = dst;
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array5<T>) -> Array5<T> {
-        // TODO: correct implementation
-        dx.clone()
-    }
-    fn print_detail(&self) {
-        println!("softmax activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix5> for Softmax5<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array5<T>) -> Array5<T> {
+//         let zero: T = cast_t2u(0.0);
+//         let mut dst = x.clone();
+//         for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+//             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+//             view.mapv_inplace(|v| T::exp(v - v_max));
+//             let v_exp_sum = view.sum();
+//             view.mapv_inplace(|v| v / v_exp_sum);
+//         }
+//         self.output = dst;
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array5<T>) -> Array5<T> {
+//         // TODO: correct implementation
+//         dx.clone()
+//     }
+//     fn print_detail(&self) {
+//         println!("softmax activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, Ix6> for Softmax6<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &Array6<T>) -> Array6<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
-            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
-            view.mapv_inplace(|v| T::exp(v - v_max));
-            let v_exp_sum = view.sum();
-            view.mapv_inplace(|v| v / v_exp_sum);
-        }
-        self.output = dst;
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &Array6<T>) -> Array6<T> {
-        // TODO: correct implementation
-        dx.clone()
-    }
-    fn print_detail(&self) {
-        println!("softmax activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, Ix6> for Softmax6<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &Array6<T>) -> Array6<T> {
+//         let zero: T = cast_t2u(0.0);
+//         let mut dst = x.clone();
+//         for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+//             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+//             view.mapv_inplace(|v| T::exp(v - v_max));
+//             let v_exp_sum = view.sum();
+//             view.mapv_inplace(|v| v / v_exp_sum);
+//         }
+//         self.output = dst;
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &Array6<T>) -> Array6<T> {
+//         // TODO: correct implementation
+//         dx.clone()
+//     }
+//     fn print_detail(&self) {
+//         println!("softmax activation layer.");
+//     }
+// }
 
-impl<T: 'static> LayerBase<T, IxDyn> for SoftmaxD<T>
-where
-    T: Float,
-{
-    fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
-        let zero: T = cast_t2u(0.0);
-        let mut dst = x.clone();
-        for mut view in dst.axis_iter_mut(Axis(self.axis)) {
-            let v_max = view.fold(zero / zero, |m, &v| v.max(m));
-            view.mapv_inplace(|v| T::exp(v - v_max));
-            let v_exp_sum = view.sum();
-            view.mapv_inplace(|v| v / v_exp_sum);
-        }
-        self.output = dst;
-        self.output.clone()
-    }
-    fn backward(&mut self, dx: &ArrayD<T>) -> ArrayD<T> {
-        // TODO: correct implementation
-        dx.clone()
-    }
-    fn print_detail(&self) {
-        println!("softmax activation layer.");
-    }
-}
+// impl<T: 'static> LayerBase<T, IxDyn> for SoftmaxD<T>
+// where
+//     T: Float,
+// {
+//     fn forward(&mut self, x: &ArrayD<T>) -> ArrayD<T> {
+//         let zero: T = cast_t2u(0.0);
+//         let mut dst = x.clone();
+//         for mut view in dst.axis_iter_mut(Axis(self.axis)) {
+//             let v_max = view.fold(zero / zero, |m, &v| v.max(m));
+//             view.mapv_inplace(|v| T::exp(v - v_max));
+//             let v_exp_sum = view.sum();
+//             view.mapv_inplace(|v| v / v_exp_sum);
+//         }
+//         self.output = dst;
+//         self.output.clone()
+//     }
+//     fn backward(&mut self, dx: &ArrayD<T>) -> ArrayD<T> {
+//         // TODO: correct implementation
+//         dx.clone()
+//     }
+//     fn print_detail(&self) {
+//         println!("softmax activation layer.");
+//     }
+// }
 
 // <<<<<<<<<<<<< Softmax layer <<<<<<<<<<<<<
-
-pub fn main() {
-    println!("< activation sub module> ");
-    let mut rng = rand::thread_rng();
-    let gen = Uniform::new(-1.0f32, 1.0f32);
-
-    let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
-    let a = a.map(|_| gen.sample(&mut rng));
-
-    println!("ReLU layer");
-    let mut layer = ReLUD::<f32>::new(a.shape());
-    let b = layer.forward(&a);
-    let da = ArrayD::<f32>::zeros(IxDyn(a.shape())).map(|_| gen.sample(&mut rng));
-    println!("a: {}", a);
-    println!("forward: {}", b);
-    println!("da: {}", da);
-    println!("backward: {}", layer.backward(&da));
-
-    println!("sigmoid layer");
-    let mut layer = SigmoidD::<f32>::new(a.shape());
-    let b = layer.forward(&a);
-    let da = ArrayD::<f32>::zeros(IxDyn(a.shape())).map(|_| gen.sample(&mut rng));
-    println!("a: {}", a);
-    println!("forward: {}", b);
-    println!("da: {}", da);
-    println!("backward: {}", layer.backward(&da));
-
-    println!("softmax layer");
-    let mut layer = SoftmaxD::<f32>::new(a.shape(), 0);
-    let b = layer.forward(&a);
-    let da = ArrayD::<f32>::zeros(IxDyn(a.shape())).map(|_| gen.sample(&mut rng));
-    println!("a: {}", a);
-    println!("forward: {}, {}", b, b.sum_axis(Axis(1)));
-    println!("da: {}", da);
-    println!("backward: {}", layer.backward(&da));
-}

@@ -7,10 +7,11 @@
 
 use super::two_layer_net::{Model, TwoLayerNet};
 use crate::dlfs01::common::choice::Choice;
-use crate::dlfs01::dataset::{load_mnist, MNISTDataSetArray2};
+// use crate::dlfs01::dataset::{load_mnist, MNISTDataSetArray2};
 use crate::dlfs01::math::arange;
 use crate::dlfs01::MathFunc;
 use crate::dlfs01::Operators;
+use crate::prelude::MNISTDataSet2;
 use ndarray::{Array, Array2, Axis};
 use plotters::prelude::*;
 use rand::prelude::*;
@@ -23,6 +24,8 @@ const NBR_OF_ITERS: usize = 10000;
 const BATCH_SIZE: usize = 100;
 const LEARNING_RATE: FF = 0.1;
 const NBR_OF_TARGET_IMAGES: usize = 60000;
+
+const VERBOSE: u8 = 1;
 
 struct TrainResult {
     train_loss_list: Vec<FF>,
@@ -44,10 +47,11 @@ pub fn main() {
     println!("< ch05 train_neural_net sub module >");
     // load MNIST dataset
     println!("load MNIST dataset...");
-    let data_set: MNISTDataSetArray2<FF> = load_mnist(0u8).unwrap().into_array2();
+    let data_set: MNISTDataSet2<FF> = MNISTDataSet2::<u8>::new(VERBOSE).unwrap().to_f64();
     let input_size = data_set.train_images.len_of(Axis(1));
     let output_size = data_set.train_labels.len_of(Axis(1));
-    let data_set: MNISTDataSetArray2<FF> = MNISTDataSetArray2 {
+    let batch_axis: usize = 0;
+    let data_set: MNISTDataSet2<FF> = MNISTDataSet2 {
         train_images: 1.0 * &data_set.train_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
         train_labels: 1.0 * &data_set.train_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
         test_images: data_set.test_images,
@@ -60,7 +64,8 @@ pub fn main() {
 
     // initialize a two-layer model
     println!("initialize a model...");
-    let mut network: TwoLayerNet<FF> = TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size);
+    let mut network: TwoLayerNet<FF> =
+        TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size, batch_axis);
     network.print_detail();
     network.verbose = false;
 
