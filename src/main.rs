@@ -1,13 +1,16 @@
 //! rs-deep
+
 #![allow(dead_code)]
 
-#[macro_use]
+// #[macro_use]
 extern crate ndarray;
 
 extern crate rs_deep;
-// use rs_deep::dlfs01::common::math_ndarray::MathFunc;
+use rs_deep::prelude::*;
 
-use ndarray::{Array, Array2, ArrayD, Axis, IxDyn};
+use std::collections::HashMap;
+// use num_traits::Float;
+use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
 // use std::time::Instant;
 
@@ -45,13 +48,14 @@ fn main() {
     // rs_deep::dlfs01::ch05::buy_apple::main();
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
     // rs_deep::dlfs01::ch05::two_layer_net::main();
-    rs_deep::dlfs01::ch05::train_neural_net::main();
+    // rs_deep::dlfs01::ch05::train_neural_net::main();
 
     // dataset
-    // rs_deep::dlfs01::dataset::main();
+    // rs_deep::dlfs01::dataset::mnist_vec::main();
 
     // test
     // test();
+    test2();
 }
 
 fn test() {
@@ -77,4 +81,23 @@ fn test() {
     let argmax = a.argmax().unwrap();
     println!("{}", a);
     println!("{:?}, {}", argmax.clone(), a[argmax]);
+}
+
+fn test2() {
+    let mut hash_map: HashMap<usize, ArrayEnum<f64>> = HashMap::new();
+    hash_map.insert(0, ArrayEnum::Array1(Array1::zeros(2)));
+    hash_map.insert(1, ArrayEnum::Array2(Array2::zeros((2, 2))));
+    hash_map.insert(2, ArrayEnum::Array3(Array3::zeros((2, 2, 2))));
+
+    for (k, v) in hash_map.iter() {
+        match v {
+            ArrayEnum::Array1(x) => println!("{}, {}", k, x),
+            ArrayEnum::Array2(x) => println!("{}, {}", k, x),
+            ArrayEnum::Array3(x) => println!("{}, {}", k, x),
+            ArrayEnum::Array4(x) => println!("{}, {}", k, x),
+            ArrayEnum::Array5(x) => println!("{}, {}", k, x),
+            ArrayEnum::Array6(x) => println!("{}, {}", k, x),
+            ArrayEnum::ArrayD(x) => println!("{}, {}", k, x),
+        }
+    }
 }
