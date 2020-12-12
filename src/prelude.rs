@@ -37,7 +37,7 @@ pub use crate::dlfs01::common::models::sequential::Sequential;
 pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::optimizers::optimizer::SGD;
+pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::util::cast_t2u;
