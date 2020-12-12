@@ -2,6 +2,10 @@
 //!
 //! optimizer struct
 
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+
 use crate::prelude::cast_t2u;
 
 use super::optimizer_base::OptimizerBase;
@@ -125,6 +129,8 @@ where
 }
 
 /// AdaGrad
+///
+/// See https://jmlr.org/papers/v12/duchi11a.html in detail
 pub struct AdaGrad<T, D> {
     lr: T,
     param: Array<T, D>,
@@ -165,6 +171,9 @@ where
 }
 
 /// RMSprop
+///
+/// See "Tijmen Tieleman; G. Hinton (2012). Lecture 6.5 - rmsprop,
+/// COURSERA: Neural Networks for Machine Learning." in detail
 pub struct RMSprop<T, D> {
     lr: T,
     decay_rate: T,
@@ -208,9 +217,18 @@ where
     }
 }
 
+/// AdaDelta
+///
+/// See https://arxiv.org/abs/1212.5701 in detail
+pub struct AdaDelta<T, D> {
+    lr: T,
+    param: Array<T, D>,
+    eps: T,
+}
+
 /// Adam
 ///
-/// See http://arxiv.org/abs/1412.6980v8 in detail
+/// See https://arxiv.org/abs/1412.6980 in detail
 pub struct Adam<T, D> {
     lr: T,
     beta1: T,
@@ -274,4 +292,142 @@ where
             *p = *p - lr_t * *m / ((*v).sqrt() + self.eps);
         }
     }
+}
+
+/// RMSpropGraves
+///
+/// See https://arxiv.org/abs/1308.0850 in detail
+pub struct RMSpropGraves<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// SMORMS3
+///
+/// See https://sifter.org/~simon/journal/20150420.html in detail
+pub struct SMORMS3<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// AdaMax
+///
+/// See https://arxiv.org/abs/1412.6980 in detail
+pub struct AdaMax<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// Nadam
+///
+/// See https://openreview.net/pdf?id=OM0jvwB8jIp57ZJjtNEZ in detail
+pub struct Nadam<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// Eve
+///
+/// See https://arxiv.org/abs/1611.01505 in detail
+pub struct Eve<T, D> {
+    lr: T,
+    beta1: T,
+    beta2: T,
+    iter: T,
+    param: Array<T, D>,
+    momentum: Array<T, D>,
+    eps: T,
+    one: T,
+    one_minus_beta1: T,
+    one_minus_beta2: T,
+}
+
+/// Santa
+///
+/// See http://proceedings.mlr.press/v51/chen16c.pdf in detail
+pub struct Santa<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// GD by GD
+///
+/// See https://proceedings.neurips.cc/paper/2016/file/fb87582825f9d28a8d42c5e5e5e8b23d-Paper.pdf
+/// in detail
+pub struct GDByGD<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// AdaSecant
+///
+/// See https://arxiv.org/abs/1412.7419 in detail
+pub struct AdaSecant<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// AMSGrad
+///
+/// See http://www.satyenkale.com/papers/amsgrad.pdf in detail
+pub struct AMSGrad<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// AdaBound
+///
+/// See https://openreview.net/pdf?id=Bkg3g2R9FX in detail
+pub struct AdaBound<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// AMSBound
+///
+/// See https://openreview.net/pdf?id=Bkg3g2R9FX in detail
+pub struct AMSBound<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
+}
+
+/// AdaBelief
+///
+/// See https://arxiv.org/abs/2010.07468 in detail
+pub struct AdaBelief<T, D> {
+    lr: T,
+    decay_rate: T,
+    param: Array<T, D>,
+    eps: T,
+    one_minus_rate: T,
 }
