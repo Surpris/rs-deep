@@ -12,6 +12,8 @@ use std::collections::HashMap;
 // use num_traits::Float;
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
+use ndarray_rand::RandomExt;
+use ndarray_rand::rand_distr::Uniform;
 // use std::time::Instant;
 
 // macro_rules! measure {
@@ -100,4 +102,9 @@ fn test2() {
             ArrayEnum::ArrayD(x) => println!("{}, {}", k, x),
         }
     }
+}
+
+fn test3() {
+    let a = Array::random((2, 5), Uniform::new(0., 10.));
+    println!("{:8.4}", a);
 }
