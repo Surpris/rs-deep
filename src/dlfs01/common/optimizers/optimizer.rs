@@ -6,6 +6,8 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
+use std::marker::PhantomData;
+
 use crate::prelude::cast_t2u;
 
 use super::optimizer_base::OptimizerBase;
@@ -16,25 +18,31 @@ use num_traits::Float;
 const EPS: f64 = 1E-8;
 
 /// stochastic gradient descent
-pub struct SGD<T> {
+pub struct SGD<T, D> {
     lr: T,
+    _phantom: PhantomData<D>,
 }
 
-impl<T> SGD<T>
-where
-    T: Float,
-{
-    pub fn new(lr: T) -> Self {
-        Self { lr }
-    }
-}
-
-impl<T, D> OptimizerBase<T, D> for SGD<T>
+impl<T, D> SGD<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn update(&mut self, param: &mut Array<T, D>, grads: &Array<T, D>) {
+    pub fn new(lr: T) -> Self {
+        Self {
+            lr,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<T, D> OptimizerBase for SGD<T, D>
+where
+    T: Float,
+    D: Dimension,
+{
+    type Src = Array<T, D>;
+    fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
         for (v, g) in param.iter_mut().zip(grads.iter()) {
             *v = *v - self.lr * *g;
         }
@@ -65,12 +73,13 @@ where
     }
 }
 
-impl<T, D> OptimizerBase<T, D> for Momentum<T, D>
+impl<T, D> OptimizerBase for Momentum<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn update(&mut self, param: &mut Array<T, D>, grads: &Array<T, D>) {
+    type Src = Array<T, D>;
+    fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
         if self.param.shape() != param.shape() {
             self.param = Array::<T, D>::zeros(param.raw_dim());
         }
@@ -111,12 +120,13 @@ where
     }
 }
 
-impl<T, D> OptimizerBase<T, D> for Nesterov<T, D>
+impl<T, D> OptimizerBase for Nesterov<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn update(&mut self, param: &mut Array<T, D>, grads: &Array<T, D>) {
+    type Src = Array<T, D>;
+    fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
         if self.param.shape() != param.shape() {
             self.param = Array::<T, D>::zeros(param.raw_dim());
         }
@@ -154,12 +164,13 @@ where
     }
 }
 
-impl<T, D> OptimizerBase<T, D> for AdaGrad<T, D>
+impl<T, D> OptimizerBase for AdaGrad<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn update(&mut self, param: &mut Array<T, D>, grads: &Array<T, D>) {
+    type Src = Array<T, D>;
+    fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
         if self.param.shape() != grads.shape() {
             self.param = Array::<T, D>::zeros(grads.raw_dim());
         }
@@ -201,12 +212,13 @@ where
     }
 }
 
-impl<T, D> OptimizerBase<T, D> for RMSprop<T, D>
+impl<T, D> OptimizerBase for RMSprop<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn update(&mut self, param: &mut Array<T, D>, grads: &Array<T, D>) {
+    type Src = Array<T, D>;
+    fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
         if self.param.shape() != grads.shape() {
             self.param = Array::<T, D>::zeros(grads.raw_dim());
         }
@@ -268,12 +280,13 @@ where
     }
 }
 
-impl<T, D> OptimizerBase<T, D> for Adam<T, D>
+impl<T, D> OptimizerBase for Adam<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn update(&mut self, param: &mut Array<T, D>, grads: &Array<T, D>) {
+    type Src = Array<T, D>;
+    fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
         if self.param.shape() != param.shape() {
             self.param = Array::<T, D>::zeros(param.raw_dim());
             self.momentum = Array::<T, D>::zeros(param.raw_dim());

@@ -34,12 +34,14 @@ where
     }
 }
 
-impl<T: 'static, D> LayerBase<T, D> for ReLU<T, D>
+impl<T: 'static, D> LayerBase<T> for ReLU<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D> {
+    type A = Array<T, D>;
+    type B = Array<T, D>;
+    fn forward(&mut self, x: &Self::A) -> Self::B {
         if self.mask.shape() != x.shape() {
             self.mask = Array::<u8, D>::zeros(x.raw_dim());
         }
@@ -47,7 +49,7 @@ where
         self.mask = x.map(|&v| if v <= zero { 1 } else { 0 });
         x.map(|&v| if v <= zero { zero } else { v })
     }
-    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D> {
+    fn backward(&mut self, dx: &Self::B) -> Self::A {
         let zero: T = cast_t2u(0.0);
         let mut dst = dx.clone();
         for (v, d) in self.mask.iter().zip(dst.iter_mut()) {
@@ -93,17 +95,19 @@ where
     }
 }
 
-impl<T: 'static, D> LayerBase<T, D> for Sigmoid<T, D>
+impl<T: 'static, D> LayerBase<T> for Sigmoid<T, D>
 where
     T: Float,
     D: Dimension,
 {
-    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D> {
+    type A = Array<T, D>;
+    type B = Array<T, D>;
+    fn forward(&mut self, x: &Self::A) -> Self::B {
         let one: T = cast_t2u(1.0);
         self.output = x.map(|&v| one / (one + T::exp(-v)));
         self.output.clone()
     }
-    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D> {
+    fn backward(&mut self, dx: &Self::B) -> Self::A {
         let one: T = cast_t2u(1.0);
         let mut dst = dx.clone();
         for (v, d) in self.output.iter().zip(dst.iter_mut()) {
@@ -149,12 +153,14 @@ where
     }
 }
 
-impl<T: 'static, D> LayerBase<T, D> for Softmax<T, D>
+impl<T: 'static, D> LayerBase<T> for Softmax<T, D>
 where
     T: Float,
     D: Dimension + RemoveAxis,
 {
-    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D> {
+    type A = Array<T, D>;
+    type B = Array<T, D>;
+    fn forward(&mut self, x: &Self::A) -> Self::B {
         let zero: T = cast_t2u(0.0);
         let batch_size: T = cast_t2u(x.len_of(Axis(0)));
 
@@ -167,7 +173,7 @@ where
         }
         self.output.clone()
     }
-    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D> {
+    fn backward(&mut self, dx: &Self::B) -> Self::A {
         // TODO: correct implementation
         dx.clone()
     }

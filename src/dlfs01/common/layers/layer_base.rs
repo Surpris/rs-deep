@@ -4,12 +4,14 @@
 
 #![allow(unused_variables)]
 
-use ndarray::prelude::*;
+// use ndarray::prelude::*;
 
 /// arbitrary-D layer trait
-pub trait LayerBase<T, D> {
-    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D>;
-    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D>;
+pub trait LayerBase<T> {
+    type A;
+    type B;
+    fn forward(&mut self, x: &Self::A) -> Self::B;
+    fn backward(&mut self, dx: &Self::B) -> Self::A;
     fn update(&mut self, lr: T) {
         return;
     }
@@ -17,9 +19,10 @@ pub trait LayerBase<T, D> {
 }
 
 /// Arbitrary-D loss layer trait
-pub trait LossLayerBase<T, D> {
-    fn forward(&mut self, x: &Array<T, D>, t: &Array<T, D>) -> T;
-    fn backward(&mut self, _dx: T) -> Array<T, D>;
+pub trait LossLayerBase<T> {
+    type A;
+    fn forward(&mut self, x: &Self::A, t: &Self::A) -> T;
+    fn backward(&mut self, _dx: T) -> Self::A;
     fn update(&mut self, lr: T) {
         return;
     }

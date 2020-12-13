@@ -48,14 +48,14 @@ fn main() {
     // rs_deep::dlfs01::ch05::buy_apple::main();
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
     // rs_deep::dlfs01::ch05::two_layer_net::main();
-    // rs_deep::dlfs01::ch05::train_neural_net::main();
+    rs_deep::dlfs01::ch05::train_neural_net::main();
 
     // dataset
     // rs_deep::dlfs01::dataset::mnist_vec::main();
 
     // test
     // test();
-    test2();
+    // test2();
 }
 
 fn test() {

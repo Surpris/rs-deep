@@ -1,5 +1,5 @@
 //! ndarray_enum
-//! 
+//!
 //! Enum consisting of Array types in ndarray crate
 
 use ndarray::prelude::*;

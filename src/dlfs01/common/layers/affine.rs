@@ -6,7 +6,7 @@
 
 use super::super::util::cast_t2u;
 use super::layer_base::LayerBase;
-use ndarray::{Array, Array1, Array2, Axis, Ix2};
+use ndarray::prelude::*;
 use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
@@ -47,11 +47,13 @@ where
     }
 }
 
-impl<T: 'static> LayerBase<T, Ix2> for Affine<T>
+impl<T: 'static> LayerBase<T> for Affine<T>
 where
     T: Float,
 {
-    fn forward(&mut self, x: &Array2<T>) -> Array2<T> {
+    type A = Array2<T>;
+    type B = Array2<T>;
+    fn forward(&mut self, x: &Self::A) -> Self::B {
         self.buff = x.clone();
         let mut dst: Array2<T> = x.dot(&self.weight);
         for v in dst.indexed_iter_mut() {
@@ -59,7 +61,7 @@ where
         }
         dst
     }
-    fn backward(&mut self, dx: &Array2<T>) -> Array2<T> {
+    fn backward(&mut self, dx: &Self::B) -> Self::A {
         let dst = dx.dot(&self.weight.t());
         self.dw = self.buff.t().dot(dx);
         self.db = dx.sum_axis(Axis(0));

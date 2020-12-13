@@ -44,12 +44,13 @@ where
     }
 }
 
-impl<T: 'static, D> LossLayerBase<T, D> for SoftmaxWithLoss<T, D>
+impl<T: 'static, D> LossLayerBase<T> for SoftmaxWithLoss<T, D>
 where
     T: Float,
     D: Dimension + RemoveAxis,
 {
-    fn forward(&mut self, x: &Array<T, D>, t: &Array<T, D>) -> T {
+    type A = Array<T, D>;
+    fn forward(&mut self, x: &Self::A, t: &Self::A) -> T {
         let batch_size: T = cast_t2u(x.len_of(Axis(0)));
 
         self.output = x.clone();
@@ -70,7 +71,7 @@ where
             });
         self.loss / batch_size
     }
-    fn backward(&mut self, _dx: T) -> Array<T, D> {
+    fn backward(&mut self, _dx: T) -> Self::A {
         let batch_size: T = cast_t2u(self.target.len_of(Axis(self.axis)));
         let mut dst = Array::<T, D>::zeros(self.target.raw_dim());
         for (t, d, o) in multizip((self.target.iter(), dst.iter_mut(), self.output.iter())) {

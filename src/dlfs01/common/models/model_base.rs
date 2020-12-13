@@ -4,15 +4,17 @@
 
 #![allow(unused_variables)]
 
-use ndarray::prelude::*;
+// use ndarray::prelude::*;
 
 /// Arbitrary-D model trait
-pub trait ModelBase<T, D1, D2> {
-    fn predict_prob(&mut self, x: &Array<T, D1>) -> Array<T, D2>;
-    fn predict(&mut self, x: &Array<T, D1>) -> Array<T, D2>;
-    fn loss(&mut self, x: &Array<T, D1>, t: &Array<T, D2>) -> T;
-    fn accuracy(&mut self, x: &Array<T, D1>, t: &Array<T, D2>) -> T;
-    fn gradient(&mut self, x: &Array<T, D1>, t: &Array<T, D2>);
-    fn update(&mut self, x: &Array<T, D1>, t: &Array<T, D2>, lr: T);
+pub trait ModelBase<T> {
+    type A;
+    type B;
+    fn predict_prob(&mut self, x: &Self::A) -> Self::B;
+    fn predict(&mut self, x: &Self::A) -> Self::B;
+    fn loss(&mut self, x: &Self::A, t: &Self::B) -> T;
+    fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T;
+    fn gradient(&mut self, x: &Self::A, t: &Self::B);
+    fn update(&mut self, x: &Self::A, t: &Self::B, lr: T);
     fn print_detail(&self);
 }
