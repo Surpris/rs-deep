@@ -18,7 +18,7 @@ use ndarray_rand::RandomExt;
 use num_traits::Float;
 
 /// Dropout
-/// 
+///
 /// See http://arxiv.org/abs/1207.0580 in detail
 pub struct DropOut<T, D> {
     ratio: T,

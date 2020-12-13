@@ -11,9 +11,9 @@ use rs_deep::prelude::*;
 use std::collections::HashMap;
 // use num_traits::Float;
 use ndarray::prelude::*;
-use ndarray_stats::QuantileExt;
-use ndarray_rand::RandomExt;
 use ndarray_rand::rand_distr::Uniform;
+use ndarray_rand::RandomExt;
+use ndarray_stats::QuantileExt;
 // use std::time::Instant;
 
 // macro_rules! measure {
