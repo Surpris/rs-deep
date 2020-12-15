@@ -43,7 +43,7 @@ pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::ndarray_enum::ArrayEnum;
+pub use crate::dlfs01::common::ndarray_ext::ndarray_enum::ArrayEnum;
 pub use crate::dlfs01::common::util::cast_t2u;
 
 // #[doc(no_inline)]
