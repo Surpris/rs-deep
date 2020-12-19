@@ -3,4 +3,4 @@
 //! Extension for ndarray
 
 pub mod ndarray_enum;
-pub mod ndarray_ops;
+pub mod ndarray_dot;
