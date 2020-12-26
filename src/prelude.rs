@@ -10,7 +10,7 @@
 //! ```
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::layers::LayerEnum;
+pub use crate::dlfs01::common::layers::call_activator;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::layers::activation::{
@@ -34,7 +34,10 @@ pub use crate::dlfs01::common::layers::softmax_with_loss::{
 pub use crate::dlfs01::common::models::model_base::ModelBase;
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::models::sequential::Sequential;
+pub use crate::dlfs01::common::models::mlp::MLPClassifier;
+
+#[doc(no_inline)]
+pub use crate::dlfs01::common::optimizers::call_optimizer;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
@@ -43,7 +46,6 @@ pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::ndarray_ext::ndarray_enum::ArrayEnum;
 pub use crate::dlfs01::common::util::cast_t2u;
 
 // #[doc(no_inline)]

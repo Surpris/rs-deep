@@ -15,6 +15,6 @@ pub trait ModelBase<T> {
     fn loss(&mut self, x: &Self::A, t: &Self::B) -> T;
     fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T;
     fn gradient(&mut self, x: &Self::A, t: &Self::B);
-    fn update(&mut self, x: &Self::A, t: &Self::B, lr: T);
+    fn update(&mut self, x: &Self::A, t: &Self::B);
     fn print_detail(&self);
 }

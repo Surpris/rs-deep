@@ -10,7 +10,6 @@ pub mod layers;
 pub mod loss_function;
 pub mod math;
 pub mod models;
-pub mod ndarray_ext;
 pub mod operators;
 pub mod optimizers;
 pub mod util;

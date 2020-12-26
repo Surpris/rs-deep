@@ -12,6 +12,7 @@ use rand::distributions::Uniform;
 use rand::prelude::*;
 
 /// Affine layer
+#[derive(Clone)]
 pub struct Affine<T> {
     pub weight: Array2<T>,
     pub bias: Array1<T>,

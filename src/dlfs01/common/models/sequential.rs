@@ -1,6 +1,8 @@
 //! sequential.rs
 //!
 //! Sequential layer model
+//!
+//! This model will be constructed in future.
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -11,16 +13,16 @@ use std::{collections::HashMap, marker::PhantomData};
 use ndarray::prelude::*;
 use num_traits::Float;
 
-use super::super::{layers::LayerEnum, optimizers::OptimizerBase};
+use super::super::optimizers::OptimizerBase;
 
-/// Sequential model
-pub struct Sequential<'a, T, D, O> {
-    pub params: Vec<LayerEnum<T, D>>,
-    pub grads: Vec<LayerEnum<T, D>>,
-    pub optimizers: HashMap<&'a str, O>,
-    _buff: Array<T, D>,
-    _phantom: PhantomData<T>,
-}
+// Sequential model
+// pub struct Sequential<'a, T, D, O> {
+//     pub params: Vec<LayerEnum<T, D>>,
+//     pub grads: Vec<LayerEnum<T, D>>,
+//     pub optimizers: HashMap<&'a str, O>,
+//     _buff: Array<T, D>,
+//     _phantom: PhantomData<T>,
+// }
 
 // impl<'a, T: 'static, D, L, O> Sequential<'a, T, D, L, O>
 // where

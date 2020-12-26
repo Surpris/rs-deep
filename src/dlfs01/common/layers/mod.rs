@@ -20,19 +20,38 @@ pub use batch_normalization::BatchNormalization;
 pub use convolution::Convolution;
 pub use dropout::DropOut;
 pub use layer_base::{LayerBase, LossLayerBase};
-// use ndarray::Dimension;
+use ndarray::{prelude::*, RemoveAxis};
+use num_traits::Float;
 pub use pooling::{MaxPooling, MeanPooling, MinPooling};
 pub use softmax_with_loss::{
     SoftmaxWithLoss, SoftmaxWithLoss2, SoftmaxWithLoss3, SoftmaxWithLoss4, SoftmaxWithLoss5,
     SoftmaxWithLoss6, SoftmaxWithLossD,
 };
 
-pub enum LayerEnum<T, D> {
-    ReLU(ReLU<T, D>),
-    Sigmoid(Sigmoid<T, D>),
-    Softmax(Softmax<T, D>),
-    Affine(Affine<T>),
+pub fn call_activator<T: 'static, D: 'static, Sh>(
+    name: &str,
+    shape: Sh,
+    batch_axis: usize,
+) -> Box<dyn LayerBase<T, A = Array<T, D>, B = Array<T, D>>>
+where
+    T: Float,
+    D: Dimension + RemoveAxis,
+    Sh: ShapeBuilder<Dim = D>,
+{
+    match name {
+        "relu" => return Box::new(ReLU::new(shape)),
+        "softmax" => return Box::new(Softmax::new(shape, batch_axis)),
+        "sigmoid" => return Box::new(Sigmoid::new(shape)),
+        _ => panic!("Invalid activator name: {}", name),
+    }
 }
+
+// pub enum LayerEnum<T, D> {
+//     ReLU(ReLU<T, D>),
+//     Sigmoid(Sigmoid<T, D>),
+//     Softmax(Softmax<T, D>),
+//     Affine(Affine<T>),
+// }
 
 // impl<T> LayerBase<T> for LayerEnum<T, D>
 // where
@@ -49,6 +68,6 @@ pub enum LayerEnum<T, D> {
 //     fn print_detail(&self);
 // }
 
-pub enum LossLayerEnum<T, D> {
-    SoftmaxWithLoss(SoftmaxWithLoss<T, D>),
-}
+// pub enum LossLayerEnum<T, D> {
+//     SoftmaxWithLoss(SoftmaxWithLoss<T, D>),
+// }
