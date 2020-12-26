@@ -49,6 +49,9 @@ pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::trainers::{TrainResult, Trainer};
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::util::{cast_t2u, CrateFloat};
 
 // #[doc(no_inline)]

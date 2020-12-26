@@ -4,7 +4,7 @@
 
 #![allow(unused_variables)]
 
-use super::super::util::CrateFloat;
+use super::super::util::*;
 
 /// Arbitrary-D model trait
 pub trait ModelBase<T: CrateFloat> {
@@ -21,6 +21,9 @@ pub trait ModelBase<T: CrateFloat> {
     }
     fn print_parameters(&self) {
         return;
+    }
+    fn get_current_loss(&self) -> T {
+        cast_t2u(0.0)
     }
     fn get_output(&self) -> Self::B;
 }

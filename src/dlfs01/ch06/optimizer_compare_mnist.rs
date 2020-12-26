@@ -13,11 +13,14 @@ use std::time::Instant;
 
 type FF = f64;
 
+const EPOCHS: usize = 17;
 const HIDDEN_SIZE: usize = 50;
 const NBR_OF_ITERS: usize = 10000;
 const BATCH_SIZE: usize = 100;
 const LEARNING_RATE: FF = 0.1;
 const NBR_OF_TARGET_IMAGES: usize = 60000;
+const NBR_OF_SAMPLES: usize = 500;
+const LOG_TEMPORAL_RESULT: bool = false;
 
 const VERBOSE: u8 = 1;
 
@@ -64,57 +67,80 @@ pub fn main() {
 
     // initialize a multi-layer model
     println!("initialize a model...");
-    let mut network: MLPClassifier<FF> = MLPClassifier::new(
-        input_size,
-        &hidden_sizes,
-        output_size,
-        &activator_enums,
-        optimizer_enum,
-        &optimizer_params,
-        batch_axis,
-    );
+    let mut network: Box<dyn ModelBase<FF, A = Array2<FF>, B = Array2<FF>>> =
+        Box::new(MLPClassifier::new(
+            input_size,
+            &hidden_sizes,
+            output_size,
+            &activator_enums,
+            optimizer_enum,
+            &optimizer_params,
+            batch_axis,
+        ));
     network.print_detail();
     // network.verbose = false;
 
     // initialize a TrainResult instance
-    let mut train_result: TrainResult = TrainResult::new();
+    let mut trainer: Trainer<FF, Ix2, Ix2> = Trainer::new(
+        data_set.train_images.clone(),
+        data_set.train_labels.clone(),
+        data_set.test_images.clone(),
+        data_set.test_labels.clone(),
+        0,
+        EPOCHS,
+        BATCH_SIZE,
+        NBR_OF_SAMPLES,
+        LOG_TEMPORAL_RESULT,
+        VERBOSE as usize,
+    );
 
     // train loop
-    let mut rng = thread_rng();
     println!("start training...");
-    let start = Instant::now();
-    for ii in 0..NBR_OF_ITERS {
-        // choose indices
-        let mut indices: Vec<usize> = vec![0usize; BATCH_SIZE];
-        for jj in 0..BATCH_SIZE {
-            indices[jj] = rng.gen_range(0, nbr_train_images);
-        }
-
-        let x_batch = data_set.train_images.select(Axis(0), &indices);
-        let t_batch = data_set.train_labels.select(Axis(0), &indices);
-
-        // update parameters of the network
-        network.update(&x_batch, &t_batch);
-
-        // calculate loss
-        train_result
-            .train_loss_list
-            .push(network.get_current_loss());
-
-        // validation
-        if ii % iter_per_epoch == 0 {
-            println!("train loss at step {}: {}", ii, network.get_current_loss());
-        }
-    }
+    trainer.train(&mut network);
     print!("validation... ");
     let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
     let test_acc = network.accuracy(&data_set.test_images, &data_set.test_labels);
     println!("acc : train={}, test={}", train_acc, test_acc);
-    let end = start.elapsed();
-    println!(
-        "{}.{:03} sec elapsed to training.",
-        end.as_secs(),
-        end.subsec_millis()
-    );
+    println!("{} sec elapsed to training.", trainer.get_elapsed_time());
     println!("training finished.");
+
+    // train loop without trainer
+    // let mut train_result: TrainResult = TrainResult::new();
+    // let mut rng = thread_rng();
+    // println!("start training...");
+    // let start = Instant::now();
+    // for ii in 0..NBR_OF_ITERS {
+    //     // choose indices
+    //     let mut indices: Vec<usize> = vec![0usize; BATCH_SIZE];
+    //     for jj in 0..BATCH_SIZE {
+    //         indices[jj] = rng.gen_range(0, nbr_train_images);
+    //     }
+
+    //     let x_batch = data_set.train_images.select(Axis(0), &indices);
+    //     let t_batch = data_set.train_labels.select(Axis(0), &indices);
+
+    //     // update parameters of the network
+    //     network.update(&x_batch, &t_batch);
+
+    //     // calculate loss
+    //     train_result
+    //         .train_loss_list
+    //         .push(network.get_current_loss());
+
+    //     // validation
+    //     if ii % iter_per_epoch == 0 {
+    //         println!("train loss at step {}: {}", ii, network.get_current_loss());
+    //     }
+    // }
+    // print!("validation... ");
+    // let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
+    // let test_acc = network.accuracy(&data_set.test_images, &data_set.test_labels);
+    // println!("acc : train={}, test={}", train_acc, test_acc);
+    // let end = start.elapsed();
+    // println!(
+    //     "{}.{:03} sec elapsed to training.",
+    //     end.as_secs(),
+    //     end.subsec_millis()
+    // );
+    // println!("training finished.");
 }

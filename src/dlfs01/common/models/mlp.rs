@@ -85,11 +85,6 @@ where
             nbr_of_affines,
         }
     }
-
-    pub fn get_current_loss(&self) -> T {
-        self.current_loss
-    }
-
     pub fn print_parameters(&self) {
         for ii in 0..self.nbr_of_hiddens {
             println!("w{}: {:?}", ii, self.affines[ii].weight);
@@ -199,6 +194,11 @@ where
         self.affines[self.nbr_of_affines - 1].print_detail();
         self.loss_layer.print_detail();
     }
+
+    fn get_current_loss(&self) -> T {
+        self.current_loss
+    }
+
     fn get_output(&self) -> Self::B {
         self.loss_layer.get_output()
     }
