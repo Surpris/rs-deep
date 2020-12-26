@@ -17,7 +17,6 @@ const EPOCHS: usize = 17;
 const HIDDEN_SIZE: usize = 50;
 const NBR_OF_ITERS: usize = 10000;
 const BATCH_SIZE: usize = 100;
-const LEARNING_RATE: FF = 0.1;
 const NBR_OF_TARGET_IMAGES: usize = 60000;
 const NBR_OF_SAMPLES: usize = 500;
 const LOG_TEMPORAL_RESULT: bool = false;
@@ -62,8 +61,14 @@ pub fn main() {
     // set activators and optimizers
     let hidden_sizes: [usize; 1] = [HIDDEN_SIZE];
     let activator_enums: [ActivatorEnum; 1] = [ActivatorEnum::ReLU];
-    let optimizer_enum: OptimizerEnum = OptimizerEnum::SGD;
-    let optimizer_params: [FF; 1] = [LEARNING_RATE];
+    let optimizer_enum: OptimizerEnum = OptimizerEnum::Adam;
+    let optimizer_params: Vec<FF> = match optimizer_enum {
+        OptimizerEnum::SGD | OptimizerEnum::AdaGrad => vec![0.1],
+        OptimizerEnum::Momentum | OptimizerEnum::Nesterov => vec![0.01, 0.9],
+        OptimizerEnum::RMSprop => vec![0.01, 0.99],
+        OptimizerEnum::Adam => vec![0.001, 0.9, 0.999],
+        _ => panic!(),
+    };
 
     // initialize a multi-layer model
     println!("initialize a model...");

@@ -8,24 +8,23 @@
 
 use std::marker::PhantomData;
 
-use crate::prelude::cast_t2u;
+use crate::prelude::*;
 
 use super::optimizer_base::OptimizerBase;
 use itertools::multizip;
 use ndarray::prelude::*;
-use num_traits::Float;
 
 const EPS: f64 = 1E-8;
 
 /// stochastic gradient descent
-pub struct SGD<T, D> {
+pub struct SGD<T: CrateFloat, D> {
     lr: T,
     _phantom: PhantomData<D>,
 }
 
 impl<T, D> SGD<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new(lr: T) -> Self {
@@ -38,7 +37,7 @@ where
 
 impl<T, D> OptimizerBase for SGD<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type Src = Array<T, D>;
@@ -50,7 +49,7 @@ where
 }
 
 /// momentum
-pub struct Momentum<T, D> {
+pub struct Momentum<T: CrateFloat, D> {
     lr: T,
     momentum: T,
     param: Array<T, D>,
@@ -58,7 +57,7 @@ pub struct Momentum<T, D> {
 
 impl<T, D> Momentum<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(lr: T, momentum: T, shape: Sh) -> Self
@@ -75,7 +74,7 @@ where
 
 impl<T, D> OptimizerBase for Momentum<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type Src = Array<T, D>;
@@ -103,7 +102,7 @@ pub struct Nesterov<T, D> {
 
 impl<T, D> Nesterov<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(lr: T, momentum: T, shape: Sh) -> Self
@@ -122,7 +121,7 @@ where
 
 impl<T, D> OptimizerBase for Nesterov<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type Src = Array<T, D>;
@@ -149,7 +148,7 @@ pub struct AdaGrad<T, D> {
 
 impl<T, D> AdaGrad<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(lr: T, shape: Sh) -> Self
@@ -166,7 +165,7 @@ where
 
 impl<T, D> OptimizerBase for AdaGrad<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type Src = Array<T, D>;
@@ -195,7 +194,7 @@ pub struct RMSprop<T, D> {
 
 impl<T, D> RMSprop<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(lr: T, decay_rate: T, shape: Sh) -> Self
@@ -214,7 +213,7 @@ where
 
 impl<T, D> OptimizerBase for RMSprop<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type Src = Array<T, D>;
@@ -232,7 +231,7 @@ where
 /// AdaDelta
 ///
 /// See https://arxiv.org/abs/1212.5701 in detail
-pub struct AdaDelta<T, D> {
+pub struct AdaDelta<T: CrateFloat, D> {
     lr: T,
     param: Array<T, D>,
     eps: T,
@@ -256,7 +255,7 @@ pub struct Adam<T, D> {
 
 impl<T, D> Adam<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(lr: T, beta1: T, beta2: T, shape: Sh) -> Self
@@ -282,7 +281,7 @@ where
 
 impl<T, D> OptimizerBase for Adam<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type Src = Array<T, D>;
@@ -310,7 +309,7 @@ where
 /// RMSpropGraves
 ///
 /// See https://arxiv.org/abs/1308.0850 in detail
-pub struct RMSpropGraves<T, D> {
+pub struct RMSpropGraves<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -321,7 +320,7 @@ pub struct RMSpropGraves<T, D> {
 /// SMORMS3
 ///
 /// See https://sifter.org/~simon/journal/20150420.html in detail
-pub struct SMORMS3<T, D> {
+pub struct SMORMS3<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -332,7 +331,7 @@ pub struct SMORMS3<T, D> {
 /// AdaMax
 ///
 /// See https://arxiv.org/abs/1412.6980 in detail
-pub struct AdaMax<T, D> {
+pub struct AdaMax<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -343,7 +342,7 @@ pub struct AdaMax<T, D> {
 /// Nadam
 ///
 /// See https://openreview.net/pdf?id=OM0jvwB8jIp57ZJjtNEZ in detail
-pub struct Nadam<T, D> {
+pub struct Nadam<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -354,7 +353,7 @@ pub struct Nadam<T, D> {
 /// Eve
 ///
 /// See https://arxiv.org/abs/1611.01505 in detail
-pub struct Eve<T, D> {
+pub struct Eve<T: CrateFloat, D> {
     lr: T,
     beta1: T,
     beta2: T,
@@ -370,7 +369,7 @@ pub struct Eve<T, D> {
 /// Santa
 ///
 /// See http://proceedings.mlr.press/v51/chen16c.pdf in detail
-pub struct Santa<T, D> {
+pub struct Santa<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -382,7 +381,7 @@ pub struct Santa<T, D> {
 ///
 /// See https://proceedings.neurips.cc/paper/2016/file/fb87582825f9d28a8d42c5e5e5e8b23d-Paper.pdf
 /// in detail
-pub struct GDByGD<T, D> {
+pub struct GDByGD<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -393,7 +392,7 @@ pub struct GDByGD<T, D> {
 /// AdaSecant
 ///
 /// See https://arxiv.org/abs/1412.7419 in detail
-pub struct AdaSecant<T, D> {
+pub struct AdaSecant<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -404,7 +403,7 @@ pub struct AdaSecant<T, D> {
 /// AMSGrad
 ///
 /// See http://www.satyenkale.com/papers/amsgrad.pdf in detail
-pub struct AMSGrad<T, D> {
+pub struct AMSGrad<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -415,7 +414,7 @@ pub struct AMSGrad<T, D> {
 /// AdaBound
 ///
 /// See https://openreview.net/pdf?id=Bkg3g2R9FX in detail
-pub struct AdaBound<T, D> {
+pub struct AdaBound<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -426,7 +425,7 @@ pub struct AdaBound<T, D> {
 /// AMSBound
 ///
 /// See https://openreview.net/pdf?id=Bkg3g2R9FX in detail
-pub struct AMSBound<T, D> {
+pub struct AMSBound<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,
@@ -437,7 +436,7 @@ pub struct AMSBound<T, D> {
 /// AdaBelief
 ///
 /// See https://arxiv.org/abs/2010.07468 in detail
-pub struct AdaBelief<T, D> {
+pub struct AdaBelief<T: CrateFloat, D> {
     lr: T,
     decay_rate: T,
     param: Array<T, D>,

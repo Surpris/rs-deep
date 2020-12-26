@@ -5,8 +5,8 @@
 pub mod optimizer;
 pub mod optimizer_base;
 
+use super::util::CrateFloat;
 use ndarray::{Array, Dimension, ShapeBuilder};
-use num_traits::Float;
 pub use optimizer::*;
 pub use optimizer_base::*;
 use std::fmt::Display;
@@ -66,7 +66,7 @@ pub fn call_optimizer<T: 'static, D: 'static, Sh>(
     params: &[T],
 ) -> Box<dyn OptimizerBase<Src = Array<T, D>>>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
     Sh: ShapeBuilder<Dim = D>,
 {
@@ -77,7 +77,7 @@ where
         OptimizerEnum::AdaGrad => return Box::new(AdaGrad::new(params[0], shape)),
         OptimizerEnum::RMSprop => return Box::new(RMSprop::new(params[0], params[1], shape)),
         // OptimizerEnum::AdaDelta => return Box::new(AdaDelta::new(params[0], params[1], shape)),
-        // OptimizerEnum::Adam => return Box::new(Adam::new(params[0], params[1], shape)),
+        OptimizerEnum::Adam => return Box::new(Adam::new(params[0], params[1], params[1], shape)),
         // OptimizerEnum::RMSpropGraves => return Box::new(RMSpropGraves::new(params[0], params[1], shape)),
         // OptimizerEnum::SMORMS3 => return Box::new(SMORMS3::new(params[0], params[1], shape)),
         // OptimizerEnum::AdaMax => return Box::new(AdaMax::new(params[0], params[1], shape)),
