@@ -10,10 +10,10 @@ extern crate rs_deep;
 
 // use std::collections::HashMap;
 // use num_traits::Float;
-use ndarray::prelude::*;
-use ndarray_rand::rand_distr::Uniform;
-use ndarray_rand::RandomExt;
-use ndarray_stats::QuantileExt;
+// use ndarray::prelude::*;
+// use ndarray_rand::rand_distr::Uniform;
+// use ndarray_rand::RandomExt;
+// use ndarray_stats::QuantileExt;
 // use std::time::Instant;
 
 // macro_rules! measure {
@@ -50,42 +50,16 @@ fn main() {
     // rs_deep::dlfs01::ch05::buy_apple::main();
     // rs_deep::dlfs01::ch05::buy_apple_orange::main();
     // rs_deep::dlfs01::ch05::two_layer_net::main();
-    rs_deep::dlfs01::ch05::train_neural_net::main();
+    // rs_deep::dlfs01::ch05::train_neural_net::main();
+
+    // chapter 06
+    rs_deep::dlfs01::ch06::optimizer_compare_mnist::main();
+
+    // common
+    // rs_deep::dlfs01::common::models::mlp::main();
 
     // dataset
     // rs_deep::dlfs01::dataset::mnist_vec::main();
 
     // test
-    // test();
-    // test2();
-}
-
-fn test() {
-    println!("test code");
-    let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
-    let b = a.map(|&v| if v == 0.0 { 1.0 } else { 0.0 });
-    for v in a.indexed_iter() {
-        println!("{:?}, {}, {}", v.0, v.1, b[v.0.clone()]);
-    }
-
-    let a = ArrayD::<f32>::ones(IxDyn(&[2, 3, 4]));
-    for ax in a.axis_iter(Axis(1)) {
-        println!("{:?}, {}", ax.shape(), ax.sum());
-    }
-    let mut ii: usize = 0;
-    for view in a.axis_iter(Axis(0)) {
-        let y = view.slice(s![ii..(ii + 1), ..]);
-        println!("{}, {}", ii, y);
-        ii += 1;
-    }
-    let a: Array2<f32> = Array::from_shape_vec((2, 2), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
-    let a = a.into_dimensionality::<IxDyn>().unwrap();
-    let argmax = a.argmax().unwrap();
-    println!("{}", a);
-    println!("{:?}, {}", argmax.clone(), a[argmax]);
-}
-
-fn test3() {
-    let a = Array::random((2, 5), Uniform::new(0., 10.));
-    println!("{:8.4}", a);
 }

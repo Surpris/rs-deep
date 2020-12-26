@@ -2,18 +2,17 @@
 //!
 //! custom layer: combination of softmax and loss
 
-use super::super::util::cast_t2u;
+use super::super::util::*;
 use super::layer_base::*;
 use itertools::multizip;
 use ndarray::{prelude::*, RemoveAxis};
-use num_traits::Float;
 use std::f64::consts::E;
 
 const EPS: f64 = 1E-8;
 
 /// Arbitrary-D softmax-with-loss layer
-pub struct SoftmaxWithLoss<T, D> {
-    pub output: Array<T, D>,
+pub struct SoftmaxWithLoss<T: CrateFloat, D> {
+    output: Array<T, D>,
     axis: usize,
     target: Array<T, D>,
     loss: T,
@@ -24,7 +23,7 @@ pub struct SoftmaxWithLoss<T, D> {
 
 impl<T: 'static, D> SoftmaxWithLoss<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(shape: Sh, axis: usize) -> Self
@@ -46,7 +45,7 @@ where
 
 impl<T: 'static, D> LossLayerBase<T> for SoftmaxWithLoss<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension + RemoveAxis,
 {
     type A = Array<T, D>;
@@ -81,6 +80,9 @@ where
     }
     fn print_detail(&self) {
         println!("softmax-with-loss layer.");
+    }
+    fn get_output(&self) -> Self::A {
+        self.output.clone()
     }
 }
 

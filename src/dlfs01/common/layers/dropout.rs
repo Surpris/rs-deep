@@ -6,21 +6,19 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
-use std::fmt::Display;
-
-use crate::prelude::cast_t2u;
+use super::super::util::*;
 
 use super::layer_base::LayerBase;
 use ndarray::prelude::*;
 use ndarray_rand::rand::{distributions::Distribution, thread_rng};
 use ndarray_rand::rand_distr::Uniform;
 use ndarray_rand::RandomExt;
-use num_traits::Float;
+use std::fmt::{Debug, Display};
 
 /// Dropout
 ///
 /// See http://arxiv.org/abs/1207.0580 in detail
-pub struct DropOut<T, D> {
+pub struct DropOut<T: CrateFloat, D> {
     ratio: T,
     mask: Array<u8, D>,
     trained: bool,
@@ -31,7 +29,7 @@ pub struct DropOut<T, D> {
 
 impl<T, D> DropOut<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(ratio: T, shape: Sh) -> Self
@@ -54,7 +52,7 @@ where
 
 impl<T, D> LayerBase<T> for DropOut<T, D>
 where
-    T: Float + Display,
+    T: CrateFloat,
     D: Dimension,
 {
     type A = Array<T, D>;

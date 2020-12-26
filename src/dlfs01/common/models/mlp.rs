@@ -10,12 +10,14 @@
 
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
-use num_traits::Float;
 
-use crate::prelude::*;
+use super::super::layers::*;
+use super::super::optimizers::*;
+use super::super::util::*;
+use super::model_base::ModelBase;
 
 /// MLP classifier
-pub struct MLPClassifier<T> {
+pub struct MLPClassifier<T: CrateFloat> {
     affines: Vec<Affine<T>>,
     activators: Vec<Box<dyn LayerBase<T, A = Array2<T>, B = Array2<T>>>>,
     loss_layer: Box<dyn LossLayerBase<T, A = Array2<T>>>,
@@ -28,18 +30,18 @@ pub struct MLPClassifier<T> {
 
 impl<T: 'static> MLPClassifier<T>
 where
-    T: Float,
+    T: CrateFloat,
 {
     pub fn new(
         input_size: usize,
         hidden_sizes: &[usize],
         output_size: usize,
-        batch_axis: usize,
-        activation_names: &[&str],
-        optimizer_name: &str,
+        activator_enums: &[ActivatorEnum],
+        optimizer_enum: OptimizerEnum,
         optimizer_params: &[T],
+        batch_axis: usize,
     ) -> Self {
-        assert_eq!(hidden_sizes.len(), activation_names.len());
+        assert_eq!(hidden_sizes.len(), activator_enums.len());
         let nbr_of_hiddens: usize = hidden_sizes.len();
         let mut affines: Vec<Affine<T>> = Vec::new();
         let mut activators: Vec<Box<dyn LayerBase<T, A = Array<T, Ix2>, B = Array<T, Ix2>>>> =
@@ -51,7 +53,7 @@ where
                 affines.push(Affine::new((hidden_sizes[ii - 1], hidden_sizes[ii])));
             }
             activators.push(call_activator(
-                activation_names[ii],
+                activator_enums[ii].clone(),
                 (hidden_sizes[ii], hidden_sizes[ii]),
                 batch_axis,
             ));
@@ -62,12 +64,12 @@ where
             batch_axis,
         ));
         let optimizer_weight = call_optimizer(
-            optimizer_name,
+            optimizer_enum.clone(),
             (hidden_sizes[hidden_sizes.len() - 1], output_size),
             optimizer_params,
         );
         let optimizer_bias = call_optimizer(
-            optimizer_name,
+            optimizer_enum,
             hidden_sizes[hidden_sizes.len() - 1],
             optimizer_params,
         );
@@ -83,11 +85,44 @@ where
             nbr_of_affines,
         }
     }
+
+    pub fn get_current_loss(&self) -> T {
+        self.current_loss
+    }
+
+    pub fn print_parameters(&self) {
+        for ii in 0..self.nbr_of_hiddens {
+            println!("w{}: {:?}", ii, self.affines[ii].weight);
+            println!("b{}: {:?}", ii, self.affines[ii].bias);
+            println!("dw{}: {:?}", ii, self.affines[ii].dw);
+            println!("db{}: {:?}", ii, self.affines[ii].db);
+        }
+        println!(
+            "w{}: {:?}",
+            self.affines.len() - 1,
+            self.affines[self.affines.len() - 1].weight
+        );
+        println!(
+            "b{}: {:?}",
+            self.affines.len() - 1,
+            self.affines[self.affines.len() - 1].bias
+        );
+        println!(
+            "dw{}: {:?}",
+            self.affines.len() - 1,
+            self.affines[self.affines.len() - 1].dw
+        );
+        println!(
+            "db{}: {:?}",
+            self.affines.len() - 1,
+            self.affines[self.affines.len() - 1].db
+        );
+    }
 }
 
 impl<T: 'static> ModelBase<T> for MLPClassifier<T>
 where
-    T: Float,
+    T: CrateFloat,
 {
     type A = Array2<T>;
 
@@ -95,7 +130,7 @@ where
 
     fn predict_prob(&mut self, x: &Self::A) -> Self::B {
         let mut y: Self::B = self.affines[0].forward(x);
-        for ii in 0..self.activators.len() {
+        for ii in 0..self.nbr_of_hiddens {
             y = self.activators[ii].forward(&y);
             y = self.affines[ii + 1].forward(&y);
         }
@@ -140,13 +175,14 @@ where
         let _dx: T = cast_t2u(1.0);
         let mut _dx: Self::B = self.loss_layer.backward(_dx);
         for ii in 0..self.activators.len() {
-            _dx = self.activators[self.nbr_of_hiddens - 1 - ii].backward(&_dx);
             _dx = self.affines[self.nbr_of_affines - 1 - ii].backward(&_dx);
+            _dx = self.activators[self.nbr_of_hiddens - 1 - ii].backward(&_dx);
         }
         _dx = self.affines[0].backward(&_dx);
     }
 
     fn update(&mut self, x: &Self::A, t: &Self::B) {
+        self.gradient(&x, &t);
         for layer in self.affines.iter_mut() {
             self.optimizer_weight
                 .update(&mut layer.weight, &mut layer.dw);
@@ -162,5 +198,8 @@ where
         }
         self.affines[self.nbr_of_affines - 1].print_detail();
         self.loss_layer.print_detail();
+    }
+    fn get_output(&self) -> Self::B {
+        self.loss_layer.get_output()
     }
 }

@@ -4,23 +4,72 @@
 
 #![allow(unused_variables)]
 
-use super::super::util::cast_t2u;
+use super::super::util::*;
 use super::layer_base::LayerBase;
 use ndarray::{prelude::*, RemoveAxis};
-use num_traits::Float;
 use std::marker::PhantomData;
+
+// >>>>>>>>>>>>> Idwntity layer >>>>>>>>>>>>>
+/// Arbitrary-D Identity layer
+pub struct Identity<T: CrateFloat, D> {
+    output: Array<T, D>,
+}
+
+impl<T: 'static, D> Identity<T, D>
+where
+    T: CrateFloat,
+    D: Dimension,
+{
+    pub fn new<Sh>(shape: Sh) -> Self
+    where
+        Sh: ShapeBuilder<Dim = D>,
+    {
+        Self {
+            output: Array::<T, D>::zeros(shape),
+        }
+    }
+}
+
+impl<T: 'static, D> LayerBase<T> for Identity<T, D>
+where
+    T: CrateFloat,
+    D: Dimension,
+{
+    type A = Array<T, D>;
+    type B = Array<T, D>;
+    fn forward(&mut self, x: &Self::A) -> Self::B {
+        self.output = x.clone();
+        self.output.clone()
+    }
+    fn backward(&mut self, dx: &Self::B) -> Self::A {
+        dx.clone()
+    }
+    fn print_detail(&self) {
+        println!("sigmoid activation layer.");
+    }
+}
+
+pub type Identity1<T> = Identity<T, Ix1>;
+pub type Identity2<T> = Identity<T, Ix2>;
+pub type Identity3<T> = Identity<T, Ix3>;
+pub type Identity4<T> = Identity<T, Ix4>;
+pub type Identity5<T> = Identity<T, Ix5>;
+pub type Identity6<T> = Identity<T, Ix6>;
+pub type IdentityD<T> = Identity<T, IxDyn>;
+
+// <<<<<<<<<<<<< Identity layer <<<<<<<<<<<<<
 
 // >>>>>>>>>>>>> ReLU layer >>>>>>>>>>>>>
 
 /// Arbitrary-D ReLU layer
-pub struct ReLU<T, D> {
+pub struct ReLU<T: CrateFloat, D> {
     mask: Array<u8, D>,
     phantom: PhantomData<T>,
 }
 
 impl<T: 'static, D> ReLU<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(shape: Sh) -> Self
@@ -36,7 +85,7 @@ where
 
 impl<T: 'static, D> LayerBase<T> for ReLU<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type A = Array<T, D>;
@@ -64,6 +113,7 @@ where
     }
 }
 
+pub type ReLU1<T> = ReLU<T, Ix1>;
 pub type ReLU2<T> = ReLU<T, Ix2>;
 pub type ReLU3<T> = ReLU<T, Ix3>;
 pub type ReLU4<T> = ReLU<T, Ix4>;
@@ -76,13 +126,13 @@ pub type ReLUD<T> = ReLU<T, IxDyn>;
 // >>>>>>>>>>>>> Sigmoid layer >>>>>>>>>>>>>
 
 /// Arbitrary-D sigmoid layer
-pub struct Sigmoid<T, D> {
+pub struct Sigmoid<T: CrateFloat, D> {
     output: Array<T, D>,
 }
 
 impl<T: 'static, D> Sigmoid<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(shape: Sh) -> Self
@@ -97,7 +147,7 @@ where
 
 impl<T: 'static, D> LayerBase<T> for Sigmoid<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     type A = Array<T, D>;
@@ -120,6 +170,7 @@ where
     }
 }
 
+pub type Sigmoid1<T> = Sigmoid<T, Ix1>;
 pub type Sigmoid2<T> = Sigmoid<T, Ix2>;
 pub type Sigmoid3<T> = Sigmoid<T, Ix3>;
 pub type Sigmoid4<T> = Sigmoid<T, Ix4>;
@@ -132,14 +183,14 @@ pub type SigmoidD<T> = Sigmoid<T, IxDyn>;
 // >>>>>>>>>>>>> Softmax layer >>>>>>>>>>>>>
 
 /// Arbitrary-D sigmoid layer
-pub struct Softmax<T, D> {
+pub struct Softmax<T: CrateFloat, D> {
     pub output: Array<T, D>,
     axis: usize,
 }
 
 impl<T: 'static, D> Softmax<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(shape: Sh, axis: usize) -> Self
@@ -155,7 +206,7 @@ where
 
 impl<T: 'static, D> LayerBase<T> for Softmax<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension + RemoveAxis,
 {
     type A = Array<T, D>;

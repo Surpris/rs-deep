@@ -4,6 +4,8 @@
 
 extern crate rs_deep;
 use ndarray::prelude::*;
+use ndarray_rand::RandomExt;
+use ndarray_stats::QuantileExt;
 use rand::distributions::Uniform;
 use rand::prelude::*;
 use rs_deep::prelude::*;
@@ -90,7 +92,66 @@ pub fn test_softmax_with_loss() {
     let b = layer.forward(&a, &t);
     println!("a: {}", a);
     println!("t: {}", t);
-    println!("output: {}", layer.output);
+    println!("output: {}", layer.get_output());
     println!("forward (loss): {}", b);
     println!("backward: {}", layer.backward(1.0));
+}
+
+#[test]
+pub fn test_mlp() {
+    println!("< ch06 mlp sub module >");
+    let mut net: MLPClassifier<f32> = MLPClassifier::new(
+        2,
+        &[10],
+        3,
+        &[ActivatorEnum::ReLU],
+        OptimizerEnum::SGD,
+        &[1.0],
+        0,
+    );
+    net.print_detail();
+    let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();
+    let t: Array2<f32> = Array::from_shape_vec((1, 3), vec![0.0, 0.0, 1.0]).unwrap();
+    println!("features: {}", x);
+    println!("target: {}", t);
+    println!("predict_prob: {:?}", net.predict_prob(&x));
+    println!("predict: {:?}", net.predict(&x));
+    println!("accuracy: {}", net.accuracy(&x, &t));
+    println!("loss: {}", net.loss(&x, &t));
+    println!("output: {}", net.get_output());
+
+    net.gradient(&x, &t);
+    println!("numerical calculation of gradients.");
+}
+
+#[test]
+pub fn test_ndarray_random() {
+    let a: Array2<f64> = Array::random((2, 5), Uniform::new(0., 10.));
+    println!("{:8.4}", a);
+}
+
+#[test]
+fn test() {
+    println!("test code");
+    let a = ArrayD::<f32>::zeros(IxDyn(&[2, 3]));
+    let b = a.map(|&v| if v == 0.0 { 1.0 } else { 0.0 });
+    for v in a.indexed_iter() {
+        println!("{:?}, {}, {}", v.0, v.1, b[v.0.clone()]);
+    }
+
+    let a = ArrayD::<f32>::ones(IxDyn(&[2, 3, 4]));
+    for ax in a.axis_iter(Axis(1)) {
+        println!("{:?}, {}", ax.shape(), ax.sum());
+    }
+    let mut ii: usize = 0;
+    for view in a.axis_iter(Axis(0)) {
+        let y = view.slice(s![ii..(ii + 1), ..]);
+        println!("{}, {}", ii, y);
+        ii += 1;
+    }
+    let a: Array2<f32> = Array::from_shape_vec((2, 2), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+    let a = a.into_dimensionality::<IxDyn>().unwrap();
+    let argmax = a.argmax().unwrap();
+    println!("{}", a);
+    println!("{:?}, {}", argmax.clone(), a[argmax]);
 }

@@ -6,11 +6,11 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
+use super::super::util::CrateFloat;
 use ndarray::prelude::*;
-use num_traits::Float;
 
 /// Convolution
-pub struct Convolution<T, D> {
+pub struct Convolution<T: CrateFloat, D> {
     weight: Array<T, D>,
     bias: Array1<T>,
     stride: usize,
@@ -24,7 +24,7 @@ pub struct Convolution<T, D> {
 
 impl<T, D> Convolution<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
 }

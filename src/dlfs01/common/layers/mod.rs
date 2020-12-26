@@ -11,9 +11,11 @@ pub mod layer_base;
 pub mod pooling;
 pub mod softmax_with_loss;
 
+use super::util::CrateFloat;
 pub use activation::{
-    ReLU, ReLU2, ReLU3, ReLU4, ReLU5, ReLU6, ReLUD, Sigmoid, Sigmoid2, Sigmoid3, Sigmoid4,
-    Sigmoid5, SigmoidD, Softmax, Softmax2, Softmax3, Softmax4, Softmax5, Softmax6, SoftmaxD,
+    Identity, ReLU, ReLU2, ReLU3, ReLU4, ReLU5, ReLU6, ReLUD, Sigmoid, Sigmoid2, Sigmoid3,
+    Sigmoid4, Sigmoid5, SigmoidD, Softmax, Softmax2, Softmax3, Softmax4, Softmax5, Softmax6,
+    SoftmaxD,
 };
 pub use affine::Affine;
 pub use batch_normalization::BatchNormalization;
@@ -21,53 +23,46 @@ pub use convolution::Convolution;
 pub use dropout::DropOut;
 pub use layer_base::{LayerBase, LossLayerBase};
 use ndarray::{prelude::*, RemoveAxis};
-use num_traits::Float;
 pub use pooling::{MaxPooling, MeanPooling, MinPooling};
 pub use softmax_with_loss::{
     SoftmaxWithLoss, SoftmaxWithLoss2, SoftmaxWithLoss3, SoftmaxWithLoss4, SoftmaxWithLoss5,
     SoftmaxWithLoss6, SoftmaxWithLossD,
 };
+use std::fmt::Display;
+
+#[derive(Clone)]
+pub enum ActivatorEnum {
+    Identity = 0,
+    ReLU = 1,
+    Sigmoid = 2,
+    Softmax = 3,
+}
+
+impl Display for ActivatorEnum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ActivatorEnum::Identity => write!(f, "Identity"),
+            ActivatorEnum::ReLU => write!(f, "ReLU"),
+            ActivatorEnum::Sigmoid => write!(f, "Sigmoid"),
+            ActivatorEnum::Softmax => write!(f, "Softmax"),
+        }
+    }
+}
 
 pub fn call_activator<T: 'static, D: 'static, Sh>(
-    name: &str,
+    name: ActivatorEnum,
     shape: Sh,
     batch_axis: usize,
 ) -> Box<dyn LayerBase<T, A = Array<T, D>, B = Array<T, D>>>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension + RemoveAxis,
     Sh: ShapeBuilder<Dim = D>,
 {
     match name {
-        "relu" => return Box::new(ReLU::new(shape)),
-        "softmax" => return Box::new(Softmax::new(shape, batch_axis)),
-        "sigmoid" => return Box::new(Sigmoid::new(shape)),
-        _ => panic!("Invalid activator name: {}", name),
+        ActivatorEnum::Identity => return Box::new(Identity::new(shape)),
+        ActivatorEnum::ReLU => return Box::new(ReLU::new(shape)),
+        ActivatorEnum::Sigmoid => return Box::new(Sigmoid::new(shape)),
+        ActivatorEnum::Softmax => return Box::new(Softmax::new(shape, batch_axis)),
     }
 }
-
-// pub enum LayerEnum<T, D> {
-//     ReLU(ReLU<T, D>),
-//     Sigmoid(Sigmoid<T, D>),
-//     Softmax(Softmax<T, D>),
-//     Affine(Affine<T>),
-// }
-
-// impl<T> LayerBase<T> for LayerEnum<T, D>
-// where
-//     T: Float,
-//     D: Dimension,
-// {
-//     type Array<T, D>;
-//     type B;
-//     fn forward(&mut self, x: &Self::A) -> Self::B;
-//     fn backward(&mut self, dx: &Self::B) -> Self::A;
-//     fn update(&mut self, lr: T) {
-//         return;
-//     }
-//     fn print_detail(&self);
-// }
-
-// pub enum LossLayerEnum<T, D> {
-//     SoftmaxWithLoss(SoftmaxWithLoss<T, D>),
-// }

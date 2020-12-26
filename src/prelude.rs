@@ -1,6 +1,6 @@
 //! prelude
 //!
-//! dlfs01 prelude.
+//! crate prelude.
 //!
 //! This module contains the most used types, type aliases, traits, functions, and macros that you can import easily as a group
 //!
@@ -10,7 +10,7 @@
 //! ```
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::layers::call_activator;
+pub use crate::dlfs01::common::layers::{call_activator, ActivatorEnum};
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::layers::activation::{
@@ -31,13 +31,16 @@ pub use crate::dlfs01::common::layers::softmax_with_loss::{
 };
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::models::ModelEnum;
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::models::model_base::ModelBase;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::models::mlp::MLPClassifier;
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::optimizers::call_optimizer;
+pub use crate::dlfs01::common::optimizers::{call_optimizer, OptimizerEnum};
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
@@ -46,7 +49,7 @@ pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::util::cast_t2u;
+pub use crate::dlfs01::common::util::{cast_t2u, CrateFloat};
 
 // #[doc(no_inline)]
 // pub use crate::dlfs01::dataset::{DataSetError, MNISTDataSet, MNISTDataSetArray2};

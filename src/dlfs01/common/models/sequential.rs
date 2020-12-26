@@ -8,12 +8,12 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
-use std::{collections::HashMap, marker::PhantomData};
+// use std::{collections::HashMap, marker::PhantomData};
 
-use ndarray::prelude::*;
-use num_traits::Float;
+// use ndarray::prelude::*;
+// use num_traits::Float;
 
-use super::super::optimizers::OptimizerBase;
+// use super::super::optimizers::OptimizerBase;
 
 // Sequential model
 // pub struct Sequential<'a, T, D, O> {

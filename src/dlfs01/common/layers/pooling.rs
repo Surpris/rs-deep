@@ -6,11 +6,11 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
+use super::super::util::CrateFloat;
 use ndarray::prelude::*;
-use num_traits::Float;
 
 /// MaxPooling
-pub struct MaxPooling<T, D> {
+pub struct MaxPooling<T: CrateFloat, D> {
     pool_height: usize,
     pool_width: usize,
     stride: usize,
@@ -21,13 +21,13 @@ pub struct MaxPooling<T, D> {
 
 impl<T, D> MaxPooling<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
 }
 
 /// MinPooling
-pub struct MinPooling<T, D> {
+pub struct MinPooling<T: CrateFloat, D> {
     pool_height: usize,
     pool_width: usize,
     stride: usize,
@@ -38,13 +38,13 @@ pub struct MinPooling<T, D> {
 
 impl<T, D> MinPooling<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
 }
 
 /// MeanPooling
-pub struct MeanPooling<T, D> {
+pub struct MeanPooling<T: CrateFloat, D> {
     pool_height: usize,
     pool_width: usize,
     stride: usize,
@@ -55,7 +55,7 @@ pub struct MeanPooling<T, D> {
 
 impl<T, D> MeanPooling<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
 }

@@ -4,16 +4,16 @@
 
 #![allow(unused_imports)]
 
-use super::super::util::cast_t2u;
+use super::super::util::*;
 use super::layer_base::LayerBase;
 use ndarray::prelude::*;
-use num_traits::Float;
 use rand::distributions::Uniform;
 use rand::prelude::*;
+use std::fmt::{Debug, Display};
 
 /// Affine layer
 #[derive(Clone)]
-pub struct Affine<T> {
+pub struct Affine<T: CrateFloat> {
     pub weight: Array2<T>,
     pub bias: Array1<T>,
     pub dw: Array2<T>,
@@ -23,7 +23,7 @@ pub struct Affine<T> {
 
 impl<T> Affine<T>
 where
-    T: Float,
+    T: CrateFloat,
 {
     pub fn new(shape: (usize, usize)) -> Self {
         let mut rng = rand::thread_rng();
@@ -50,7 +50,7 @@ where
 
 impl<T: 'static> LayerBase<T> for Affine<T>
 where
-    T: Float,
+    T: CrateFloat,
 {
     type A = Array2<T>;
     type B = Array2<T>;
@@ -80,5 +80,11 @@ where
         println!("affine layer.");
         println!("weight shape: {:?}", self.dw.shape());
         println!("bias shape: {:?}", self.bias.shape());
+    }
+    fn print_parameters(&self) {
+        println!("weight: {:?}", self.weight);
+        println!("bias: {:?}", self.bias);
+        println!("dw: {:?}", self.dw);
+        println!("db: {:?}", self.db);
     }
 }

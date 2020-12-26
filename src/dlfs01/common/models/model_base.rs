@@ -4,10 +4,10 @@
 
 #![allow(unused_variables)]
 
-// use ndarray::prelude::*;
+use super::super::util::CrateFloat;
 
 /// Arbitrary-D model trait
-pub trait ModelBase<T> {
+pub trait ModelBase<T: CrateFloat> {
     type A;
     type B;
     fn predict_prob(&mut self, x: &Self::A) -> Self::B;
@@ -16,5 +16,11 @@ pub trait ModelBase<T> {
     fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T;
     fn gradient(&mut self, x: &Self::A, t: &Self::B);
     fn update(&mut self, x: &Self::A, t: &Self::B);
-    fn print_detail(&self);
+    fn print_detail(&self) {
+        return;
+    }
+    fn print_parameters(&self) {
+        return;
+    }
+    fn get_output(&self) -> Self::B;
 }

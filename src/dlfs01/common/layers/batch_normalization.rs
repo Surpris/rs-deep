@@ -6,13 +6,14 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
+use super::super::util::CrateFloat;
 use ndarray::prelude::*;
-use num_traits::Float;
+use std::fmt::{Debug, Display};
 
 /// BatchNormalization
 ///
 /// See http://arxiv.org/abs/1502.03167 in detail
-pub struct BatchNormalization<T, D> {
+pub struct BatchNormalization<T: CrateFloat, D> {
     gamma: T,
     beta: T,
     momentum: T,
@@ -27,7 +28,7 @@ pub struct BatchNormalization<T, D> {
 
 impl<T, D> BatchNormalization<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
 }
