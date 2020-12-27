@@ -1,6 +1,6 @@
-//! optimizer_compare_mnist.rs
+//! weight_init_compare
 //!
-//! comparison of optimizers using MNIST
+//! comparison of initialization of weights
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -61,7 +61,7 @@ pub fn main() {
     // set activators and optimizers
     let hidden_sizes: [usize; 1] = [HIDDEN_SIZE];
     let activator_enums: [ActivatorEnum; 1] = [ActivatorEnum::ReLU];
-    let optimizer_enum: OptimizerEnum = OptimizerEnum::Adam;
+    let optimizer_enum: OptimizerEnum = OptimizerEnum::SGD;
     let optimizer_params: Vec<FF> = match optimizer_enum {
         OptimizerEnum::SGD | OptimizerEnum::AdaGrad => vec![0.1],
         OptimizerEnum::Momentum | OptimizerEnum::Nesterov => vec![0.01, 0.9],
@@ -72,8 +72,8 @@ pub fn main() {
 
     // initialize a multi-layer model
     println!("initialize a model...");
-    let weight_init: DistributionEnum = DistributionEnum::Uniform;
-    let weight_init_params: [FF; 2] = [-1.0, 1.0];
+    let weight_init: DistributionEnum = DistributionEnum::Normal;
+    let weight_init_params: [FF; 2] = [0.0, 0.01];
     let mut network: Box<dyn ModelBase<FF, A = Array2<FF>, B = Array2<FF>>> =
         Box::new(MLPClassifier::new(
             input_size,

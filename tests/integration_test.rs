@@ -100,6 +100,8 @@ pub fn test_softmax_with_loss() {
 #[test]
 pub fn test_mlp() {
     println!("< ch06 mlp sub module >");
+    let weight_init: DistributionEnum = DistributionEnum::Uniform;
+    let weight_init_params: [f32; 2] = [-1.0, 1.0];
     let mut net: MLPClassifier<f32> = MLPClassifier::new(
         2,
         &[10],
@@ -108,6 +110,8 @@ pub fn test_mlp() {
         OptimizerEnum::SGD,
         &[1.0],
         0,
+        weight_init,
+        &weight_init_params
     );
     net.print_detail();
     let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();

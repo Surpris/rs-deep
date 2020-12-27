@@ -53,7 +53,8 @@ fn main() {
     // rs_deep::dlfs01::ch05::train_neural_net::main();
 
     // chapter 06
-    rs_deep::dlfs01::ch06::optimizer_compare_mnist::main();
+    // rs_deep::dlfs01::ch06::optimizer_compare_mnist::main();
+    rs_deep::dlfs01::ch06::weight_init_compare::main();
 
     // common
     // rs_deep::dlfs01::common::models::mlp::main();

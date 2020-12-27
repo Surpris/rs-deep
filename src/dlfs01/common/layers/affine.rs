@@ -4,6 +4,7 @@
 
 #![allow(unused_imports)]
 
+use super::super::param_initializers::*;
 use super::super::util::*;
 use super::layer_base::LayerBase;
 use ndarray::prelude::*;
@@ -25,12 +26,16 @@ impl<T> Affine<T>
 where
     T: CrateFloat,
 {
-    pub fn new(shape: (usize, usize)) -> Self {
-        let mut rng = rand::thread_rng();
-        let gen = Uniform::new(-1.0f32, 1.0f32);
+    pub fn new(
+        shape: (usize, usize),
+        weight_init: DistributionEnum,
+        weight_init_params: &[T],
+    ) -> Self {
+        // let mut rng = rand::thread_rng();
+        // let gen = Uniform::new(-1.0f32, 1.0f32);
         Affine {
-            weight: Array2::<T>::ones(shape).map(|_| cast_t2u(gen.sample(&mut rng))),
-            bias: Array1::<T>::ones(shape.1).map(|_| cast_t2u(gen.sample(&mut rng))),
+            weight: initialize_randomized_ndarray(weight_init.clone(), shape, weight_init_params),
+            bias: initialize_randomized_ndarray(weight_init, shape.1, weight_init_params),
             dw: Array2::<T>::ones(shape),
             db: Array1::<T>::ones(shape.1),
             buff: Array2::<T>::ones(shape),
@@ -78,7 +83,7 @@ where
     }
     fn print_detail(&self) {
         println!("affine layer.");
-        println!("weight shape: {:?}", self.dw.shape());
+        println!("weight shape: {:?}", self.weight.shape());
         println!("bias shape: {:?}", self.bias.shape());
     }
     fn print_parameters(&self) {

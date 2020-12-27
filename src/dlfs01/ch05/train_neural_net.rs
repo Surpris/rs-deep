@@ -5,6 +5,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use crate::prelude::*;
 use super::two_layer_net::{Model, TwoLayerNet};
 use crate::dlfs01::common::choice::Choice;
 // use crate::dlfs01::dataset::{load_mnist, MNISTDataSetArray2};
@@ -64,8 +65,10 @@ pub fn main() {
 
     // initialize a two-layer model
     println!("initialize a model...");
+    let weight_init: DistributionEnum = DistributionEnum::Uniform;
+    let weight_init_params: [FF; 2] = [-1.0, 1.0];
     let mut network: TwoLayerNet<FF> =
-        TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size, batch_axis);
+        TwoLayerNet::new(input_size, HIDDEN_SIZE, output_size, batch_axis, weight_init, &weight_init_params);
     network.print_detail();
     network.verbose = false;
 

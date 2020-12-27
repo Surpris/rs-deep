@@ -49,6 +49,11 @@ pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::param_initializers::{
+    initialize_randomized_ndarray, DistributionEnum,
+};
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::trainers::{TrainResult, Trainer};
 
 #[doc(no_inline)]

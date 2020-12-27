@@ -13,6 +13,7 @@ use ndarray_stats::QuantileExt;
 
 use super::super::layers::*;
 use super::super::optimizers::*;
+use super::super::param_initializers::DistributionEnum;
 use super::super::util::*;
 use super::model_base::ModelBase;
 
@@ -40,6 +41,8 @@ where
         optimizer_enum: OptimizerEnum,
         optimizer_params: &[T],
         batch_axis: usize,
+        weight_init: DistributionEnum,
+        weight_init_params: &[T],
     ) -> Self {
         assert_eq!(hidden_sizes.len(), activator_enums.len());
         let nbr_of_hiddens: usize = hidden_sizes.len();
@@ -48,9 +51,17 @@ where
             Vec::new();
         for ii in 0..nbr_of_hiddens {
             if ii == 0 {
-                affines.push(Affine::new((input_size, hidden_sizes[ii])));
+                affines.push(Affine::new(
+                    (input_size, hidden_sizes[ii]),
+                    weight_init.clone(),
+                    weight_init_params,
+                ));
             } else {
-                affines.push(Affine::new((hidden_sizes[ii - 1], hidden_sizes[ii])));
+                affines.push(Affine::new(
+                    (hidden_sizes[ii - 1], hidden_sizes[ii]),
+                    weight_init.clone(),
+                    weight_init_params,
+                ));
             }
             activators.push(call_activator(
                 activator_enums[ii].clone(),
@@ -58,7 +69,11 @@ where
                 batch_axis,
             ));
         }
-        affines.push(Affine::new((hidden_sizes[nbr_of_hiddens - 1], output_size)));
+        affines.push(Affine::new(
+            (hidden_sizes[nbr_of_hiddens - 1], output_size),
+            weight_init,
+            weight_init_params,
+        ));
         let loss_layer = Box::new(SoftmaxWithLoss2::new(
             (output_size, output_size),
             batch_axis,
