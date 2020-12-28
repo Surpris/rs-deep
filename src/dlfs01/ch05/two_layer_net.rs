@@ -35,13 +35,17 @@ where
         hidden_size: usize,
         output_size: usize,
         batch_axis: usize,
-        weight_init: DistributionEnum,
-        weight_init_params: &[T],
+        weight_init: WeightInitEnum,
+        weight_init_std: T,
     ) -> Self {
         TwoLayerNet {
-            affine1: Affine::new((input_size, hidden_size), weight_init.clone(), weight_init_params),
+            affine1: Affine::new(
+                (input_size, hidden_size),
+                weight_init.clone(),
+                weight_init_std,
+            ),
             activator: ReLU2::new((hidden_size, hidden_size)),
-            affine2: Affine::new((hidden_size, output_size), weight_init, weight_init_params),
+            affine2: Affine::new((hidden_size, output_size), weight_init, weight_init_std),
             loss_layer: SoftmaxWithLoss2::new((output_size, output_size), batch_axis),
             verbose: false,
             current_loss: cast_t2u(0.0),
@@ -114,9 +118,9 @@ where
 
 pub fn main() {
     println!("< ch05 two_layer_net sub module >");
-    let weight_init: DistributionEnum = DistributionEnum::Uniform;
-    let weight_init_params: [f32; 2] = [-1.0, 1.0];
-    let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3, 0, weight_init, &weight_init_params);
+    let weight_init: WeightInitEnum = WeightInitEnum::Normal;
+    let weight_init_params: f32 = 1.0;
+    let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3, 0, weight_init, weight_init_params);
     net.print_detail();
     let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();
     let t: Array2<f32> = Array::from_shape_vec((1, 3), vec![0.0, 0.0, 1.0]).unwrap();

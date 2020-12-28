@@ -72,8 +72,8 @@ pub fn main() {
 
     // initialize a multi-layer model
     println!("initialize a model...");
-    let weight_init: DistributionEnum = DistributionEnum::Normal;
-    let weight_init_params: [FF; 2] = [0.0, 0.01];
+    let weight_init: WeightInitEnum = WeightInitEnum::Normal;
+    let weight_init_params: FF = 0.01;
     let mut network: Box<dyn ModelBase<FF, A = Array2<FF>, B = Array2<FF>>> =
         Box::new(MLPClassifier::new(
             input_size,
@@ -84,7 +84,7 @@ pub fn main() {
             &optimizer_params,
             batch_axis,
             weight_init,
-            &weight_init_params,
+            weight_init_params,
         ));
     network.print_detail();
 

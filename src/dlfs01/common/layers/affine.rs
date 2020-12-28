@@ -4,7 +4,7 @@
 
 #![allow(unused_imports)]
 
-use super::super::param_initializers::*;
+use super::super::param_initializers::weight_init::{initialize_weight, WeightInitEnum};
 use super::super::util::*;
 use super::layer_base::LayerBase;
 use ndarray::prelude::*;
@@ -26,16 +26,12 @@ impl<T> Affine<T>
 where
     T: CrateFloat,
 {
-    pub fn new(
-        shape: (usize, usize),
-        weight_init: DistributionEnum,
-        weight_init_params: &[T],
-    ) -> Self {
+    pub fn new(shape: (usize, usize), weight_init: WeightInitEnum, weight_init_std: T) -> Self {
         // let mut rng = rand::thread_rng();
         // let gen = Uniform::new(-1.0f32, 1.0f32);
         Affine {
-            weight: initialize_randomized_ndarray(weight_init.clone(), shape, weight_init_params),
-            bias: initialize_randomized_ndarray(weight_init, shape.1, weight_init_params),
+            weight: initialize_weight(weight_init.clone(), weight_init_std, shape),
+            bias: initialize_weight(weight_init, weight_init_std, shape.1),
             dw: Array2::<T>::ones(shape),
             db: Array1::<T>::ones(shape.1),
             buff: Array2::<T>::ones(shape),
