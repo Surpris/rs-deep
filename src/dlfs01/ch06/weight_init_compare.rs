@@ -23,6 +23,7 @@ const LOG_TEMPORAL_RESULT: bool = false;
 
 const VERBOSE: u8 = 1;
 
+#[derive(Clone, Debug)]
 struct TrainResult {
     train_loss_list: Vec<FF>,
     train_acc_list: Vec<FF>,
