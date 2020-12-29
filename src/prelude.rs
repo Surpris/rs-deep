@@ -10,7 +10,7 @@
 //! ```
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::layers::{call_activator, ActivatorEnum};
+pub use crate::dlfs01::common::layers::{call_activator, ActivatorEnum, BasicLayerEnum};
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::layers::activation::{

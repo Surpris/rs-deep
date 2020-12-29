@@ -30,7 +30,24 @@ pub use softmax_with_loss::{
 };
 use std::fmt::Display;
 
-#[derive(Clone)]
+/// Enum of basic layers
+#[derive(Clone, Debug)]
+pub enum BasicLayerEnum {
+    Affine = 0,
+    Convolution = 1,
+}
+
+impl Display for BasicLayerEnum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BasicLayerEnum::Affine => write!(f, "Affine"),
+            BasicLayerEnum::Convolution => write!(f, "Convolution"),
+        }
+    }
+}
+
+/// Enum of activators
+#[derive(Clone, Debug)]
 pub enum ActivatorEnum {
     Identity = 0,
     ReLU = 1,
@@ -49,6 +66,7 @@ impl Display for ActivatorEnum {
     }
 }
 
+/// generate an activator
 pub fn call_activator<T: 'static, D: 'static, Sh>(
     name: ActivatorEnum,
     shape: Sh,

@@ -11,14 +11,15 @@
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
 
-use super::super::layers::*;
+use super::{super::layers::*, ModelEnum};
 use super::super::optimizers::*;
 use super::super::param_initializers::weight_init::WeightInitEnum;
 use super::super::util::*;
 use super::model_base::ModelBase;
+use super::model_params::ModelParameters;
 
 /// MLP classifier
-pub struct MLPClassifier<T: CrateFloat> {
+pub struct MLPClassifier<T: 'static + CrateFloat> {
     affines: Vec<Affine<T>>,
     activators: Vec<Box<dyn LayerBase<T, A = Array2<T>, B = Array2<T>>>>,
     loss_layer: Box<dyn LossLayerBase<T, A = Array2<T>>>,
@@ -27,6 +28,7 @@ pub struct MLPClassifier<T: CrateFloat> {
     current_loss: T,
     nbr_of_hiddens: usize,
     nbr_of_affines: usize,
+    params: ModelParameters<T>,
 }
 
 impl<T: 'static> MLPClassifier<T>
@@ -41,52 +43,68 @@ where
         optimizer_enum: OptimizerEnum,
         optimizer_params: &[T],
         batch_axis: usize,
-        weight_init: WeightInitEnum,
+        weight_init_enum: WeightInitEnum,
         weight_init_std: T,
     ) -> Self {
         assert_eq!(hidden_sizes.len(), activator_enums.len());
-        let nbr_of_hiddens: usize = hidden_sizes.len();
+        let model_parameters: ModelParameters<T> = ModelParameters::from(
+            ModelEnum::MLPClassifier, 
+            input_size, 
+            hidden_sizes.to_vec(), 
+            output_size, 
+            batch_axis, 
+            activator_enums.to_vec(), 
+            optimizer_enum, 
+            optimizer_params.to_vec(), 
+            weight_init_enum, 
+            weight_init_std
+        );
+        Self::from(model_parameters)
+    }
+    pub fn from(params: ModelParameters<T>) -> Self {
+        let params_clone = params.clone();
+        let nbr_of_hiddens: usize = params.hidden_sizes.len();
         let mut affines: Vec<Affine<T>> = Vec::new();
         let mut activators: Vec<Box<dyn LayerBase<T, A = Array<T, Ix2>, B = Array<T, Ix2>>>> =
             Vec::new();
         for ii in 0..nbr_of_hiddens {
             if ii == 0 {
                 affines.push(Affine::new(
-                    (input_size, hidden_sizes[ii]),
-                    weight_init.clone(),
-                    weight_init_std,
+                    (params.input_size, params.hidden_sizes[ii]),
+                    params.weight_init_enum.clone(),
+                    params.weight_init_std,
                 ));
             } else {
                 affines.push(Affine::new(
-                    (hidden_sizes[ii - 1], hidden_sizes[ii]),
-                    weight_init.clone(),
-                    weight_init_std,
+                    (params.hidden_sizes[ii - 1], params.hidden_sizes[ii]),
+                    params.weight_init_enum.clone(),
+                    params.weight_init_std,
                 ));
             }
             activators.push(call_activator(
-                activator_enums[ii].clone(),
-                (hidden_sizes[ii], hidden_sizes[ii]),
-                batch_axis,
+                params.activator_enums[ii].clone(),
+                (params.hidden_sizes[ii], params.hidden_sizes[ii]),
+                params.batch_axis,
             ));
         }
         affines.push(Affine::new(
-            (hidden_sizes[nbr_of_hiddens - 1], output_size),
-            weight_init,
-            weight_init_std,
+            (params.hidden_sizes[nbr_of_hiddens - 1], params.output_size),
+            params.weight_init_enum,
+            params.weight_init_std,
         ));
         let loss_layer = Box::new(SoftmaxWithLoss2::new(
-            (output_size, output_size),
-            batch_axis,
+            (params.output_size, params.output_size),
+            params.batch_axis,
         ));
         let optimizer_weight = call_optimizer(
-            optimizer_enum.clone(),
-            (hidden_sizes[hidden_sizes.len() - 1], output_size),
-            optimizer_params,
+            params.optimizer_enum.clone(),
+            (params.hidden_sizes[params.hidden_sizes.len() - 1], params.output_size),
+            &params.optimizer_params,
         );
         let optimizer_bias = call_optimizer(
-            optimizer_enum,
-            hidden_sizes[hidden_sizes.len() - 1],
-            optimizer_params,
+            params.optimizer_enum,
+            params.hidden_sizes[params.hidden_sizes.len() - 1],
+            &params.optimizer_params,
         );
         let nbr_of_affines: usize = affines.len();
         Self {
@@ -98,6 +116,7 @@ where
             current_loss: cast_t2u(0.0),
             nbr_of_hiddens,
             nbr_of_affines,
+            params: params_clone
         }
     }
     pub fn print_parameters(&self) {

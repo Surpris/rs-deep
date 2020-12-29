@@ -11,7 +11,8 @@ pub use optimizer::*;
 pub use optimizer_base::*;
 use std::fmt::Display;
 
-#[derive(Clone)]
+/// Enum of optimizers
+#[derive(Clone, Debug)]
 pub enum OptimizerEnum {
     SGD = 0,
     Momentum = 1,
@@ -60,6 +61,7 @@ impl Display for OptimizerEnum {
     }
 }
 
+/// generate an optimizer
 pub fn call_optimizer<T: 'static, D: 'static, Sh>(
     name: OptimizerEnum,
     shape: Sh,
