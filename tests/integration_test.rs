@@ -159,3 +159,22 @@ fn test() {
     println!("{}", a);
     println!("{:?}, {}", argmax.clone(), a[argmax]);
 }
+
+#[test]
+fn test_ops_different_shape() {
+    let a: Array2<u8> = array![[0, 1, 2], [3, 4, 5]];
+    let b: Array1<u8> = array![1, 1, 1];
+    let c: Array2<u8> = a + b;
+    assert_eq!(c, array![[1, 2, 3], [4, 5, 6]]);
+
+    let a: Array2<u8> = array![[1, 1, 2], [3, 4, 5]];
+    let b: Array1<u8> = array![1, 1, 1];
+    let c: Array2<u8> = a - b;
+    assert_eq!(c, array![[0, 0, 1], [2, 3, 4]]);
+
+    let a: Array2<u8> = array![[1, 1, 2], [3, 4, 5], [3, 4, 5]];
+    let b: Array1<u8> = array![1, 1, 2];
+    let c: Array2<u8> = a - b;
+    assert_eq!(c, array![[0, 0, 0], [2, 3, 3], [2, 3, 3]]);
+    assert!(c != array![[0, 0, 1], [2, 3, 4], [1, 2, 3]]);
+}
