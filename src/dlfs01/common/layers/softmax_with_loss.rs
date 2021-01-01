@@ -4,7 +4,7 @@
 
 use super::super::util::*;
 use super::layer_base::*;
-use itertools::multizip;
+// use itertools::multizip;
 use ndarray::{prelude::*, RemoveAxis};
 use std::f64::consts::E;
 
@@ -72,11 +72,12 @@ where
     }
     fn backward(&mut self, _dx: T) -> Self::A {
         let batch_size: T = cast_t2u(self.target.len_of(Axis(self.axis)));
-        let mut dst = Array::<T, D>::zeros(self.target.raw_dim());
-        for (t, d, o) in multizip((self.target.iter(), dst.iter_mut(), self.output.iter())) {
-            *d = (*o - *t) / batch_size;
-        }
-        dst
+        (self.output.clone() - &self.target) / batch_size
+        //     let mut dst = Array::<T, D>::zeros(self.target.raw_dim());
+        //     for (t, d, o) in multizip((self.target.iter(), dst.iter_mut(), self.output.iter())) {
+        //         *d = (*o - *t) / batch_size;
+        //     }
+        //     dst
     }
     fn print_detail(&self) {
         println!("softmax-with-loss layer.");

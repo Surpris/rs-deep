@@ -57,11 +57,12 @@ where
     type B = Array2<T>;
     fn forward(&mut self, x: &Self::A) -> Self::B {
         self.buff = x.clone();
-        let mut dst: Array2<T> = x.dot(&self.weight);
-        for v in dst.indexed_iter_mut() {
-            *v.1 = *v.1 + self.bias[v.0 .1];
-        }
-        dst
+        x.dot(&self.weight) + &self.bias
+        // let mut dst: Array2<T> = x.dot(&self.weight);
+        // for v in dst.indexed_iter_mut() {
+        //     *v.1 = *v.1 + self.bias[v.0 .1];
+        // }
+        // dst
     }
     fn backward(&mut self, dx: &Self::B) -> Self::A {
         let dst = dx.dot(&self.weight.t());
@@ -70,12 +71,14 @@ where
         dst
     }
     fn update(&mut self, lr: T) {
-        for v in self.weight.indexed_iter_mut() {
-            *v.1 = *v.1 - lr * self.dw[v.0];
-        }
-        for v in self.bias.indexed_iter_mut() {
-            *v.1 = *v.1 - lr * self.db[v.0];
-        }
+        self.weight.scaled_add(-lr, &self.dw);
+        self.bias.scaled_add(-lr, &self.db);
+        // for v in self.weight.indexed_iter_mut() {
+        //     *v.1 = *v.1 - lr * self.dw[v.0];
+        // }
+        // for v in self.bias.indexed_iter_mut() {
+        //     *v.1 = *v.1 - lr * self.db[v.0];
+        // }
     }
     fn print_detail(&self) {
         println!("affine layer.");

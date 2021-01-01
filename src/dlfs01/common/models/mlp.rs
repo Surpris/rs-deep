@@ -11,12 +11,12 @@
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
 
-use super::{super::layers::*, ModelEnum};
 use super::super::optimizers::*;
 use super::super::param_initializers::weight_init::WeightInitEnum;
 use super::super::util::*;
 use super::model_base::ModelBase;
 use super::model_params::ModelParameters;
+use super::{super::layers::*, ModelEnum};
 
 /// MLP classifier
 pub struct MLPClassifier<T: 'static + CrateFloat> {
@@ -48,16 +48,16 @@ where
     ) -> Self {
         assert_eq!(hidden_sizes.len(), activator_enums.len());
         let model_parameters: ModelParameters<T> = ModelParameters::from(
-            ModelEnum::MLPClassifier, 
-            input_size, 
-            hidden_sizes.to_vec(), 
-            output_size, 
-            batch_axis, 
-            activator_enums.to_vec(), 
-            optimizer_enum, 
-            optimizer_params.to_vec(), 
-            weight_init_enum, 
-            weight_init_std
+            ModelEnum::MLPClassifier,
+            input_size,
+            hidden_sizes.to_vec(),
+            output_size,
+            batch_axis,
+            activator_enums.to_vec(),
+            optimizer_enum,
+            optimizer_params.to_vec(),
+            weight_init_enum,
+            weight_init_std,
         );
         Self::from(model_parameters)
     }
@@ -98,7 +98,10 @@ where
         ));
         let optimizer_weight = call_optimizer(
             params.optimizer_enum.clone(),
-            (params.hidden_sizes[params.hidden_sizes.len() - 1], params.output_size),
+            (
+                params.hidden_sizes[params.hidden_sizes.len() - 1],
+                params.output_size,
+            ),
             &params.optimizer_params,
         );
         let optimizer_bias = call_optimizer(
@@ -116,7 +119,7 @@ where
             current_loss: cast_t2u(0.0),
             nbr_of_hiddens,
             nbr_of_affines,
-            params: params_clone
+            params: params_clone,
         }
     }
     pub fn print_parameters(&self) {

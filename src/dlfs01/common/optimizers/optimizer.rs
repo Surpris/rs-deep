@@ -42,9 +42,10 @@ where
 {
     type Src = Array<T, D>;
     fn update(&mut self, param: &mut Self::Src, grads: &Self::Src) {
-        for (v, g) in param.iter_mut().zip(grads.iter()) {
-            *v = *v - self.lr * *g;
-        }
+        param.scaled_add(-self.lr, grads);
+        // for (v, g) in param.iter_mut().zip(grads.iter()) {
+        //     *v = *v - self.lr * *g;
+        // }
     }
 }
 
@@ -82,6 +83,11 @@ where
         if self.param.shape() != param.shape() {
             self.param = Array::<T, D>::zeros(param.raw_dim());
         }
+        // self.param *= self.momentum;
+        // self.param.scaled_add(-self.lr, grads);
+        // for (v, p) in multizip((self.param.iter(), param.iter_mut())) {
+        //     *p = *p + *v;
+        // }
         for (v, p, g) in multizip((self.param.iter_mut(), param.iter_mut(), grads.iter())) {
             *v = self.momentum * *v - self.lr * *g;
             *p = *p + *v;
@@ -129,10 +135,13 @@ where
         if self.param.shape() != param.shape() {
             self.param = Array::<T, D>::zeros(param.raw_dim());
         }
+        // self.param *= self.momentum;
+        // self.param.scaled_add(-self.lr, grads);
+        // param.scaled_add(self.mom2, &self.param);
+        // param.scaled_add(-self.one_plus_mom * self.lr, grads);
         for (v, p, g) in multizip((self.param.iter_mut(), param.iter_mut(), grads.iter())) {
             *v = self.momentum * *v - self.lr * *g;
-            *p = *p + self.mom2 * *v;
-            *p = *p - self.one_plus_mom * self.lr * *g;
+            *p = *p + self.mom2 * *v - self.one_plus_mom * self.lr * *g;
         }
     }
 }
