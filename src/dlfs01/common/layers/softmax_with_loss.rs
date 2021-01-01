@@ -2,18 +2,17 @@
 //!
 //! custom layer: combination of softmax and loss
 
-use super::super::util::cast_t2u;
+use super::super::util::*;
 use super::layer_base::*;
-use itertools::multizip;
+// use itertools::multizip;
 use ndarray::{prelude::*, RemoveAxis};
-use num_traits::Float;
 use std::f64::consts::E;
 
 const EPS: f64 = 1E-8;
 
 /// Arbitrary-D softmax-with-loss layer
-pub struct SoftmaxWithLoss<T, D> {
-    pub output: Array<T, D>,
+pub struct SoftmaxWithLoss<T: CrateFloat, D> {
+    output: Array<T, D>,
     axis: usize,
     target: Array<T, D>,
     loss: T,
@@ -24,7 +23,7 @@ pub struct SoftmaxWithLoss<T, D> {
 
 impl<T: 'static, D> SoftmaxWithLoss<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension,
 {
     pub fn new<Sh>(shape: Sh, axis: usize) -> Self
@@ -44,12 +43,13 @@ where
     }
 }
 
-impl<T: 'static, D> LossLayerBase<T, D> for SoftmaxWithLoss<T, D>
+impl<T: 'static, D> LossLayerBase<T> for SoftmaxWithLoss<T, D>
 where
-    T: Float,
+    T: CrateFloat,
     D: Dimension + RemoveAxis,
 {
-    fn forward(&mut self, x: &Array<T, D>, t: &Array<T, D>) -> T {
+    type A = Array<T, D>;
+    fn forward(&mut self, x: &Self::A, t: &Self::A) -> T {
         let batch_size: T = cast_t2u(x.len_of(Axis(0)));
 
         self.output = x.clone();
@@ -70,16 +70,20 @@ where
             });
         self.loss / batch_size
     }
-    fn backward(&mut self, _dx: T) -> Array<T, D> {
+    fn backward(&mut self, _dx: T) -> Self::A {
         let batch_size: T = cast_t2u(self.target.len_of(Axis(self.axis)));
-        let mut dst = Array::<T, D>::zeros(self.target.raw_dim());
-        for (t, d, o) in multizip((self.target.iter(), dst.iter_mut(), self.output.iter())) {
-            *d = (*o - *t) / batch_size;
-        }
-        dst
+        (self.output.clone() - &self.target) / batch_size
+        //     let mut dst = Array::<T, D>::zeros(self.target.raw_dim());
+        //     for (t, d, o) in multizip((self.target.iter(), dst.iter_mut(), self.output.iter())) {
+        //         *d = (*o - *t) / batch_size;
+        //     }
+        //     dst
     }
     fn print_detail(&self) {
         println!("softmax-with-loss layer.");
+    }
+    fn get_output(&self) -> Self::A {
+        self.output.clone()
     }
 }
 

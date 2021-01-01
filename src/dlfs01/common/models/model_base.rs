@@ -4,15 +4,26 @@
 
 #![allow(unused_variables)]
 
-use ndarray::prelude::*;
+use super::super::util::*;
 
 /// Arbitrary-D model trait
-pub trait ModelBase<T, D1, D2> {
-    fn predict_prob(&mut self, x: &Array<T, D1>) -> Array<T, D2>;
-    fn predict(&mut self, x: &Array<T, D1>) -> Array<T, D2>;
-    fn loss(&mut self, x: &Array<T, D1>, t: &Array<T, D2>) -> T;
-    fn accuracy(&mut self, x: &Array<T, D1>, t: &Array<T, D2>) -> T;
-    fn gradient(&mut self, x: &Array<T, D1>, t: &Array<T, D2>);
-    fn update(&mut self, x: &Array<T, D1>, t: &Array<T, D2>, lr: T);
-    fn print_detail(&self);
+pub trait ModelBase<T: CrateFloat> {
+    type A;
+    type B;
+    fn predict_prob(&mut self, x: &Self::A) -> Self::B;
+    fn predict(&mut self, x: &Self::A) -> Self::B;
+    fn loss(&mut self, x: &Self::A, t: &Self::B) -> T;
+    fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T;
+    fn gradient(&mut self, x: &Self::A, t: &Self::B);
+    fn update(&mut self, x: &Self::A, t: &Self::B);
+    fn print_detail(&self) {
+        return;
+    }
+    fn print_parameters(&self) {
+        return;
+    }
+    fn get_current_loss(&self) -> T {
+        cast_t2u(0.0)
+    }
+    fn get_output(&self) -> Self::B;
 }

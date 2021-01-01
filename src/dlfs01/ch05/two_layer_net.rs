@@ -2,11 +2,9 @@
 //!
 //! two-layer net
 
-use crate::dlfs01::cast_t2u;
-use crate::dlfs01::common::layers::*;
+use crate::prelude::*;
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
-use num_traits::Float;
 
 pub trait Model<T> {
     // fn train(&self);
@@ -19,7 +17,7 @@ pub trait Model<T> {
     fn print_detail(&self);
 }
 
-pub struct TwoLayerNet<T> {
+pub struct TwoLayerNet<T: CrateFloat> {
     pub affine1: Affine<T>,
     pub activator: ReLU2<T>,
     pub affine2: Affine<T>,
@@ -30,18 +28,24 @@ pub struct TwoLayerNet<T> {
 
 impl<T: 'static> TwoLayerNet<T>
 where
-    T: Float,
+    T: CrateFloat,
 {
     pub fn new(
         input_size: usize,
         hidden_size: usize,
         output_size: usize,
         batch_axis: usize,
+        weight_init: WeightInitEnum,
+        weight_init_std: T,
     ) -> Self {
         TwoLayerNet {
-            affine1: Affine::new((input_size, hidden_size)),
+            affine1: Affine::new(
+                (input_size, hidden_size),
+                weight_init.clone(),
+                weight_init_std,
+            ),
             activator: ReLU2::new((hidden_size, hidden_size)),
-            affine2: Affine::new((hidden_size, output_size)),
+            affine2: Affine::new((hidden_size, output_size), weight_init, weight_init_std),
             loss_layer: SoftmaxWithLoss2::new((output_size, output_size), batch_axis),
             verbose: false,
             current_loss: cast_t2u(0.0),
@@ -51,7 +55,7 @@ where
 
 impl<T: 'static> Model<T> for TwoLayerNet<T>
 where
-    T: Float + std::fmt::Display,
+    T: CrateFloat,
 {
     fn predict_prob(&mut self, x: &Array2<T>) -> Array2<T> {
         let y = self.affine1.forward(&x);
@@ -114,7 +118,9 @@ where
 
 pub fn main() {
     println!("< ch05 two_layer_net sub module >");
-    let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3, 0);
+    let weight_init: WeightInitEnum = WeightInitEnum::Normal;
+    let weight_init_params: f32 = 1.0;
+    let mut net: TwoLayerNet<f32> = TwoLayerNet::new(2, 10, 3, 0, weight_init, weight_init_params);
     net.print_detail();
     let x: Array2<f32> = Array::from_shape_vec((1, 2), vec![0.6, 0.9]).unwrap();
     let t: Array2<f32> = Array::from_shape_vec((1, 3), vec![0.0, 0.0, 1.0]).unwrap();
@@ -124,16 +130,16 @@ pub fn main() {
     println!("predict: {:?}", net.predict(&x));
     println!("accuracy: {}", net.accuracy(&x, &t));
     println!("loss: {}", net.loss(&x, &t));
-    println!("output: {}", net.loss_layer.output);
+    println!("output: {}", net.loss_layer.get_output());
 
     net.gradient(&x, &t);
     println!("numerical calculation of gradients.");
-    println!("w1: {:?}", net.affine1.weight);
-    println!("b1: {:?}", net.affine1.bias);
-    println!("w2: {:?}", net.affine2.weight);
-    println!("b2: {:?}", net.affine2.bias);
-    println!("grad_w1: {:?}", net.affine1.dw);
-    println!("grad_b1: {:?}", net.affine1.db);
-    println!("grad_w2: {:?}", net.affine2.dw);
-    println!("grad_b2: {:?}", net.affine2.db);
+    println!("w0: {:?}", net.affine1.weight);
+    println!("b0: {:?}", net.affine1.bias);
+    println!("w1: {:?}", net.affine2.weight);
+    println!("b1: {:?}", net.affine2.bias);
+    println!("dw0: {:?}", net.affine1.dw);
+    println!("db0: {:?}", net.affine1.db);
+    println!("dw1: {:?}", net.affine2.dw);
+    println!("db1: {:?}", net.affine2.db);
 }

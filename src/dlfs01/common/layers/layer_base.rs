@@ -4,24 +4,38 @@
 
 #![allow(unused_variables)]
 
-use ndarray::prelude::*;
+use super::super::util::CrateFloat;
 
 /// arbitrary-D layer trait
-pub trait LayerBase<T, D> {
-    fn forward(&mut self, x: &Array<T, D>) -> Array<T, D>;
-    fn backward(&mut self, dx: &Array<T, D>) -> Array<T, D>;
+pub trait LayerBase<T: CrateFloat> {
+    type A;
+    type B;
+    fn forward(&mut self, x: &Self::A) -> Self::B;
+    fn backward(&mut self, dx: &Self::B) -> Self::A;
     fn update(&mut self, lr: T) {
         return;
     }
-    fn print_detail(&self);
+    fn print_detail(&self) {
+        return;
+    }
+    fn print_parameters(&self) {
+        return;
+    }
 }
 
 /// Arbitrary-D loss layer trait
-pub trait LossLayerBase<T, D> {
-    fn forward(&mut self, x: &Array<T, D>, t: &Array<T, D>) -> T;
-    fn backward(&mut self, _dx: T) -> Array<T, D>;
+pub trait LossLayerBase<T: CrateFloat> {
+    type A;
+    fn forward(&mut self, x: &Self::A, t: &Self::A) -> T;
+    fn backward(&mut self, _dx: T) -> Self::A;
     fn update(&mut self, lr: T) {
         return;
     }
-    fn print_detail(&self);
+    fn print_detail(&self) {
+        return;
+    }
+    fn print_parameters(&self) {
+        return;
+    }
+    fn get_output(&self) -> Self::A;
 }

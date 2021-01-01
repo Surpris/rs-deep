@@ -2,7 +2,47 @@
 //!
 //! utility functions
 
-use num_traits::{Num, NumCast};
+use ndarray::ScalarOperand;
+use ndarray_rand::rand_distr::uniform::SampleUniform;
+use num_traits::{Float, FromPrimitive, Num, NumCast};
+use std::fmt::{Debug, Display};
+use std::ops;
+
+/// Float trait for this crate
+pub trait CrateFloat:
+    Float
+    + ops::Add<Output = Self>
+    + ops::Sub<Output = Self>
+    + ops::Mul<Output = Self>
+    + ops::Div<Output = Self>
+    + ops::AddAssign
+    + ops::SubAssign
+    + ops::MulAssign
+    + ops::DivAssign
+    + FromPrimitive
+    + SampleUniform
+    + ScalarOperand
+    + Debug
+    + Display
+{
+}
+impl<T> CrateFloat for T where
+    T: Float
+        + ops::Add<Output = Self>
+        + ops::Sub<Output = Self>
+        + ops::Mul<Output = Self>
+        + ops::Div<Output = Self>
+        + ops::AddAssign
+        + ops::SubAssign
+        + ops::MulAssign
+        + ops::DivAssign
+        + FromPrimitive
+        + SampleUniform
+        + ScalarOperand
+        + Debug
+        + Display
+{
+}
 
 /// cast a numeric value with type T to one with U
 pub fn cast_t2u<T, U>(x: T) -> U
