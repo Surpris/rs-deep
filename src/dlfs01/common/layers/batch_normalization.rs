@@ -15,7 +15,7 @@ use std::fmt::{Debug, Display};
 const EPS: f64 = 1E-8;
 
 /// Enum for BatchNormalization layer
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum UseBatchNormEnum<T: CrateFloat> {
     Use(T),
     None,

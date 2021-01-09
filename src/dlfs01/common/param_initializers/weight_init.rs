@@ -8,7 +8,7 @@ use ndarray::prelude::*;
 use std::fmt::Display;
 
 /// Enum of initializers of weights
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum WeightInitEnum {
     Normal = 0,
     ReLU = 1,

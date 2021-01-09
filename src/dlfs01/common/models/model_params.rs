@@ -10,7 +10,7 @@ use super::ModelEnum;
 use std::fmt::Display;
 
 /// Model parameters
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelParameters<T: 'static + CrateFloat> {
     pub model_enum: ModelEnum,
     pub input_size: usize,

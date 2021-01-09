@@ -15,7 +15,7 @@ pub use model_params::ModelParameters;
 use std::fmt::Display;
 
 /// Enum of models
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ModelEnum {
     None = -1,
     MLPClassifier = 0,
