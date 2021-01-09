@@ -41,7 +41,7 @@ impl TrainResult {
 }
 
 pub fn main() {
-    println!("< ch06 optimizer_compare_mnist sub module >");
+    println!("< ch06 weight_init_compare sub module >");
     // load MNIST dataset
     println!("load MNIST dataset...");
     let data_set: MNISTDataSet2<FF> = MNISTDataSet2::<u8>::new(VERBOSE).unwrap().to_f64();
@@ -70,6 +70,7 @@ pub fn main() {
         OptimizerEnum::Adam => vec![0.001, 0.9, 0.999],
         _ => panic!(),
     };
+    let use_batch_norm = UseBatchNormEnum::None;
 
     // initialize a multi-layer model
     println!("initialize a model...");
@@ -83,11 +84,14 @@ pub fn main() {
             &activator_enums,
             optimizer_enum,
             &optimizer_params,
+            use_batch_norm,
             batch_axis,
             weight_init,
             weight_init_params,
         ));
     network.print_detail();
+    println!("Initial parameters:");
+    network.print_parameters();
 
     // initialize a TrainResult instance
     let mut trainer: Trainer<FF, Ix2, Ix2> = Trainer::new(
@@ -106,10 +110,13 @@ pub fn main() {
     // train loop
     println!("start training...");
     trainer.train(&mut network);
+    println!("training finished.");
+    println!("{} sec elapsed to training.", trainer.get_elapsed_time());
+    println!("Final parameters:");
+    network.print_parameters();
     print!("validation... ");
     let train_acc = network.accuracy(&data_set.train_images, &data_set.train_labels);
     let test_acc = network.accuracy(&data_set.test_images, &data_set.test_labels);
     println!("acc : train={}, test={}", train_acc, test_acc);
-    println!("{} sec elapsed to training.", trainer.get_elapsed_time());
-    println!("training finished.");
+    println!("< ch06 weight_init_compare sub module > finished.");
 }

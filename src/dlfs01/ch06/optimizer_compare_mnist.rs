@@ -69,6 +69,7 @@ pub fn main() {
         OptimizerEnum::Adam => vec![0.001, 0.9, 0.999],
         _ => panic!(),
     };
+    let use_batch_norm = UseBatchNormEnum::None;
 
     // initialize a multi-layer model
     println!("initialize a model...");
@@ -82,6 +83,7 @@ pub fn main() {
             &activator_enums,
             optimizer_enum,
             &optimizer_params,
+            use_batch_norm,
             batch_axis,
             weight_init,
             weight_init_params,

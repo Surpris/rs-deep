@@ -2,7 +2,7 @@
 //!
 //! Parameters for initialization of models
 
-use super::super::layers::ActivatorEnum;
+use super::super::layers::{ActivatorEnum, UseBatchNormEnum};
 use super::super::optimizers::OptimizerEnum;
 use super::super::param_initializers::WeightInitEnum;
 use super::super::util::*;
@@ -20,6 +20,7 @@ pub struct ModelParameters<T: 'static + CrateFloat> {
     pub activator_enums: Vec<ActivatorEnum>,
     pub optimizer_enum: OptimizerEnum,
     pub optimizer_params: Vec<T>,
+    pub use_batch_norm: UseBatchNormEnum<T>,
     pub weight_init_enum: WeightInitEnum,
     pub weight_init_std: T,
 }
@@ -38,6 +39,7 @@ where
             activator_enums: Vec::new(),
             optimizer_enum: OptimizerEnum::SGD,
             optimizer_params: Vec::new(),
+            use_batch_norm: UseBatchNormEnum::None,
             weight_init_enum: WeightInitEnum::Normal,
             weight_init_std: cast_t2u(0.0),
         }
@@ -51,6 +53,7 @@ where
         activator_enums: Vec<ActivatorEnum>,
         optimizer_enum: OptimizerEnum,
         optimizer_params: Vec<T>,
+        use_batch_norm: UseBatchNormEnum<T>,
         weight_init_enum: WeightInitEnum,
         weight_init_std: T,
     ) -> Self {
@@ -63,6 +66,7 @@ where
             activator_enums,
             optimizer_enum,
             optimizer_params,
+            use_batch_norm,
             weight_init_enum,
             weight_init_std,
         }

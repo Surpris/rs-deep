@@ -21,6 +21,8 @@ use super::{super::layers::*, ModelEnum};
 /// MLP classifier
 pub struct MLPClassifier<T: 'static + CrateFloat> {
     affines: Vec<Affine<T>>,
+    use_batch_norm: UseBatchNormEnum<T>,
+    batch_norm_layers: Vec<BatchNormalization<T, Ix2>>,
     activators: Vec<Box<dyn LayerBase<T, A = Array2<T>, B = Array2<T>>>>,
     loss_layer: Box<dyn LossLayerBase<T, A = Array2<T>>>,
     optimizer_weight: Box<dyn OptimizerBase<Src = Array2<T>>>,
@@ -42,6 +44,7 @@ where
         activator_enums: &[ActivatorEnum],
         optimizer_enum: OptimizerEnum,
         optimizer_params: &[T],
+        use_batch_norm: UseBatchNormEnum<T>,
         batch_axis: usize,
         weight_init_enum: WeightInitEnum,
         weight_init_std: T,
@@ -56,6 +59,7 @@ where
             activator_enums.to_vec(),
             optimizer_enum,
             optimizer_params.to_vec(),
+            use_batch_norm,
             weight_init_enum,
             weight_init_std,
         );
@@ -65,8 +69,8 @@ where
         let params_clone = params.clone();
         let nbr_of_hiddens: usize = params.hidden_sizes.len();
         let mut affines: Vec<Affine<T>> = Vec::new();
-        let mut activators: Vec<Box<dyn LayerBase<T, A = Array<T, Ix2>, B = Array<T, Ix2>>>> =
-            Vec::new();
+        let mut activators: Vec<Box<dyn LayerBase<T, A = Array2<T>, B = Array2<T>>>> = Vec::new();
+        let mut batch_norm_layers: Vec<BatchNormalization<T, Ix2>> = Vec::new();
         for ii in 0..nbr_of_hiddens {
             if ii == 0 {
                 affines.push(Affine::new(
@@ -81,6 +85,11 @@ where
                     params.weight_init_std,
                 ));
             }
+            batch_norm_layers.push(validate_batch_norm_enum(
+                params.use_batch_norm.clone(),
+                (params.hidden_sizes[ii], params.hidden_sizes[ii]),
+                params.batch_axis,
+            ));
             activators.push(call_activator(
                 params.activator_enums[ii].clone(),
                 (params.hidden_sizes[ii], params.hidden_sizes[ii]),
@@ -92,16 +101,18 @@ where
             params.weight_init_enum,
             params.weight_init_std,
         ));
+        batch_norm_layers.push(validate_batch_norm_enum(
+            params.use_batch_norm.clone(),
+            (params.output_size, params.output_size),
+            params.batch_axis,
+        ));
         let loss_layer = Box::new(SoftmaxWithLoss2::new(
             (params.output_size, params.output_size),
             params.batch_axis,
         ));
         let optimizer_weight = call_optimizer(
             params.optimizer_enum.clone(),
-            (
-                params.hidden_sizes[params.hidden_sizes.len() - 1],
-                params.output_size,
-            ),
+            (params.output_size, params.output_size),
             &params.optimizer_params,
         );
         let optimizer_bias = call_optimizer(
@@ -112,6 +123,8 @@ where
         let nbr_of_affines: usize = affines.len();
         Self {
             affines,
+            use_batch_norm: params.use_batch_norm,
+            batch_norm_layers,
             activators,
             loss_layer,
             optimizer_weight,
@@ -121,34 +134,6 @@ where
             nbr_of_affines,
             params: params_clone,
         }
-    }
-    pub fn print_parameters(&self) {
-        for ii in 0..self.nbr_of_hiddens {
-            println!("w{}: {:?}", ii, self.affines[ii].weight);
-            println!("b{}: {:?}", ii, self.affines[ii].bias);
-            println!("dw{}: {:?}", ii, self.affines[ii].dw);
-            println!("db{}: {:?}", ii, self.affines[ii].db);
-        }
-        println!(
-            "w{}: {:?}",
-            self.affines.len() - 1,
-            self.affines[self.affines.len() - 1].weight
-        );
-        println!(
-            "b{}: {:?}",
-            self.affines.len() - 1,
-            self.affines[self.affines.len() - 1].bias
-        );
-        println!(
-            "dw{}: {:?}",
-            self.affines.len() - 1,
-            self.affines[self.affines.len() - 1].dw
-        );
-        println!(
-            "db{}: {:?}",
-            self.affines.len() - 1,
-            self.affines[self.affines.len() - 1].db
-        );
     }
 }
 
@@ -162,9 +147,15 @@ where
 
     fn predict_prob(&mut self, x: &Self::A) -> Self::B {
         let mut y: Self::B = self.affines[0].forward(x);
+        if self.use_batch_norm != UseBatchNormEnum::None {
+            y = self.batch_norm_layers[0].forward(&y);
+        }
         for ii in 0..self.nbr_of_hiddens {
             y = self.activators[ii].forward(&y);
             y = self.affines[ii + 1].forward(&y);
+            if self.use_batch_norm != UseBatchNormEnum::None {
+                y = self.batch_norm_layers[ii + 1].forward(&y);
+            }
         }
         y
     }
@@ -207,8 +198,14 @@ where
         let _dx: T = cast_t2u(1.0);
         let mut _dx: Self::B = self.loss_layer.backward(_dx);
         for ii in 0..self.activators.len() {
+            if self.use_batch_norm != UseBatchNormEnum::None {
+                _dx = self.batch_norm_layers[self.nbr_of_affines - 1 - ii].backward(&_dx);
+            }
             _dx = self.affines[self.nbr_of_affines - 1 - ii].backward(&_dx);
             _dx = self.activators[self.nbr_of_hiddens - 1 - ii].backward(&_dx);
+        }
+        if self.use_batch_norm != UseBatchNormEnum::None {
+            _dx = self.batch_norm_layers[0].backward(&_dx);
         }
         _dx = self.affines[0].backward(&_dx);
     }
@@ -220,16 +217,49 @@ where
                 .update(&mut layer.weight, &mut layer.dw);
             self.optimizer_bias.update(&mut layer.bias, &mut layer.db);
         }
+        if self.use_batch_norm != UseBatchNormEnum::None {
+            for layer in self.batch_norm_layers.iter_mut() {
+                self.optimizer_bias
+                    .update(&mut layer.gamma, &mut layer.dgamma);
+                self.optimizer_bias
+                    .update(&mut layer.beta, &mut layer.dbeta);
+            }
+        }
     }
 
     fn print_detail(&self) {
         println!("MLP classifier.");
         for ii in 0..self.activators.len() {
             self.affines[ii].print_detail();
+            if self.use_batch_norm != UseBatchNormEnum::None {
+                self.batch_norm_layers[ii].print_detail();
+            }
             self.activators[ii].print_detail();
         }
         self.affines[self.nbr_of_affines - 1].print_detail();
+        if self.use_batch_norm != UseBatchNormEnum::None {
+            self.batch_norm_layers[self.nbr_of_affines - 1].print_detail();
+        }
         self.loss_layer.print_detail();
+    }
+
+    fn print_parameters(&self) {
+        println!("Affine layers:");
+        for ii in 0..self.nbr_of_hiddens {
+            println!("Layer {}:", ii);
+            self.affines[ii].print_parameters();
+        }
+        println!("Layer {}:", self.affines.len() - 1);
+        self.affines[self.affines.len() - 1].print_parameters();
+        if self.use_batch_norm != UseBatchNormEnum::None {
+            println!("BatchNormalization layers:");
+            for ii in 0..self.nbr_of_hiddens {
+                println!("Layer {}:", ii);
+                self.batch_norm_layers[ii].print_parameters();
+            }
+            println!("Layer {}:", self.batch_norm_layers.len() - 1);
+            self.batch_norm_layers[self.batch_norm_layers.len() - 1].print_parameters();
+        }
     }
 
     fn get_current_loss(&self) -> T {

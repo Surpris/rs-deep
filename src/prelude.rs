@@ -22,6 +22,11 @@ pub use crate::dlfs01::common::layers::activation::{
 pub use crate::dlfs01::common::layers::affine::Affine;
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::layers::batch_normalization::{
+    validate_batch_norm_enum, BatchNormalization, UseBatchNormEnum,
+};
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::layers::layer_base::{LayerBase, LossLayerBase};
 
 #[doc(no_inline)]

@@ -18,7 +18,7 @@ pub use activation::{
     SoftmaxD,
 };
 pub use affine::Affine;
-pub use batch_normalization::BatchNormalization;
+pub use batch_normalization::{validate_batch_norm_enum, BatchNormalization, UseBatchNormEnum};
 pub use convolution::Convolution;
 pub use dropout::DropOut;
 pub use layer_base::{LayerBase, LossLayerBase};
