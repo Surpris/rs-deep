@@ -36,13 +36,16 @@ pub use crate::dlfs01::common::layers::softmax_with_loss::{
 };
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::models::mlp::MLPClassifier;
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::models::ModelEnum;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::models::model_base::ModelBase;
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::models::mlp::MLPClassifier;
+pub use crate::dlfs01::common::models::model_params::ModelParameters;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::optimizers::{call_optimizer, OptimizerEnum};

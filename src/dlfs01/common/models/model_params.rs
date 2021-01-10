@@ -7,11 +7,17 @@ use super::super::optimizers::OptimizerEnum;
 use super::super::param_initializers::WeightInitEnum;
 use super::super::util::*;
 use super::ModelEnum;
-use std::fmt::Display;
+use serde::Deserialize;
+use serde_json;
+// use std::fs;
+use std::fs::File;
+use std::io;
+use std::io::prelude::*;
+use std::{fmt::Display, path::Path};
 
 /// Model parameters
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ModelParameters<T: 'static + CrateFloat> {
+pub struct ModelParameters<T: CrateFloat> {
     pub model_enum: ModelEnum,
     pub input_size: usize,
     pub hidden_sizes: Vec<usize>,
@@ -70,6 +76,22 @@ where
             weight_init_enum,
             weight_init_std,
         }
+    }
+    pub fn from_json(src: &Path) -> Result<Self, io::Error>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        let mut file: File = File::open(src)?;
+        let mut buff: String = String::new();
+        let _ = file.read_to_string(&mut buff);
+        let dst: Self = serde_json::from_reader(buff.as_bytes())?;
+        Ok(dst)
+    }
+    pub fn to_json(&self, dst: &Path) -> Result<(), io::Error> {
+        let mut file: File = File::create(dst)?;
+        write!(file, "{}", serde_json::to_string(&self)?)?;
+        file.flush()?;
+        Ok(())
     }
 }
 

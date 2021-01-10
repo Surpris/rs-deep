@@ -5,6 +5,7 @@
 use ndarray::ScalarOperand;
 use ndarray_rand::rand_distr::uniform::SampleUniform;
 use num_traits::{Float, FromPrimitive, Num, NumCast};
+use serde::Serialize;
 use std::fmt::{Debug, Display};
 use std::ops;
 
@@ -24,6 +25,7 @@ pub trait CrateFloat:
     + ScalarOperand
     + Debug
     + Display
+    + Serialize // + Deserialize<'static>
 {
 }
 impl<T> CrateFloat for T where
@@ -41,6 +43,7 @@ impl<T> CrateFloat for T where
         + ScalarOperand
         + Debug
         + Display
+        + Serialize // + Deserialize<'static>
 {
 }
 

@@ -10,6 +10,9 @@
 
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
+use serde::Deserialize;
+use std::io;
+use std::path::Path;
 
 use super::super::optimizers::*;
 use super::super::param_initializers::weight_init::WeightInitEnum;
@@ -134,6 +137,17 @@ where
             nbr_of_affines,
             params: params_clone,
         }
+    }
+    pub fn read_scheme_from_json(src: &Path) -> Result<Self, io::Error>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        let params: ModelParameters<T> = ModelParameters::from_json(src)?;
+        Ok(Self::from(params))
+    }
+    pub fn write_scheme_to_json(&self, dst: &Path) -> Result<(), io::Error> {
+        self.params.to_json(dst)?;
+        Ok(())
     }
 }
 
