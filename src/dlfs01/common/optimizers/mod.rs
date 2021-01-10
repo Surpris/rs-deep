@@ -12,7 +12,7 @@ pub use optimizer_base::*;
 use std::fmt::Display;
 
 /// Enum of optimizers
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum OptimizerEnum {
     SGD = 0,
     Momentum = 1,

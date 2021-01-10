@@ -31,7 +31,7 @@ pub use softmax_with_loss::{
 use std::fmt::Display;
 
 /// Enum of basic layers
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum BasicLayerEnum {
     Affine = 0,
     Convolution = 1,
@@ -47,7 +47,7 @@ impl Display for BasicLayerEnum {
 }
 
 /// Enum of activators
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ActivatorEnum {
     Identity = 0,
     ReLU = 1,

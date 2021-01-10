@@ -64,8 +64,11 @@ fn main() {
     // dataset
     // rs_deep::dlfs01::dataset::mnist_vec::main();
 
+    // examples
+    rs_deep::dlfs01::examples::train_mlp_test::main();
+
     // test
-    test();
+    // test();
 }
 
 fn test() {

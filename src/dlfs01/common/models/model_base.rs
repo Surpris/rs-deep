@@ -5,6 +5,8 @@
 #![allow(unused_variables)]
 
 use super::super::util::*;
+use std::io;
+use std::path::Path;
 
 /// Arbitrary-D model trait
 pub trait ModelBase<T: CrateFloat> {
@@ -26,4 +28,5 @@ pub trait ModelBase<T: CrateFloat> {
         cast_t2u(0.0)
     }
     fn get_output(&self) -> Self::B;
+    fn write_scheme_to_json(&self, dst: &Path) -> Result<(), io::Error>;
 }
