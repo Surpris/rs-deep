@@ -23,7 +23,7 @@ pub use crate::dlfs01::common::layers::affine::Affine;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::layers::batch_normalization::{
-    validate_batch_norm_enum, BatchNormalization, UseBatchNormEnum,
+    call_batch_norm_layer, BatchNormalization, UseBatchNormEnum,
 };
 
 #[doc(no_inline)]
@@ -67,6 +67,11 @@ pub use crate::dlfs01::common::param_initializers::ndarray_init::{
 #[doc(no_inline)]
 pub use crate::dlfs01::common::param_initializers::weight_init::{
     initialize_weight, WeightInitEnum,
+};
+
+#[doc(no_inline)]
+pub use crate::dlfs01::common::regularizers::{
+    call_regularizer, L1Norm, L2Norm, RegularizerBase, RegularizerEnum,
 };
 
 #[doc(no_inline)]

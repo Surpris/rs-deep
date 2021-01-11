@@ -14,6 +14,8 @@ use serde::Deserialize;
 use std::io::{self, ErrorKind};
 use std::path::Path;
 
+use crate::dlfs01::common::regularizers::{call_regularizer, RegularizerBase, RegularizerEnum};
+
 use super::super::optimizers::*;
 use super::super::param_initializers::weight_init::WeightInitEnum;
 use super::super::util::*;
@@ -30,6 +32,8 @@ pub struct MLPClassifier<T: 'static + CrateFloat> {
     loss_layer: Box<dyn LossLayerBase<T, A = Array2<T>>>,
     optimizer_weight: Box<dyn OptimizerBase<Src = Array2<T>>>,
     optimizer_bias: Box<dyn OptimizerBase<Src = Array1<T>>>,
+    regularizer_enum: RegularizerEnum<T>,
+    regularizer: Box<dyn RegularizerBase<T, A = Array2<T>>>,
     current_loss: T,
     nbr_of_hidden_layers: usize,
     nbr_of_affine_layers: usize,
@@ -48,6 +52,7 @@ where
         optimizer_enum: OptimizerEnum,
         optimizer_params: &[T],
         use_batch_norm: UseBatchNormEnum<T>,
+        regularizer_enum: RegularizerEnum<T>,
         batch_axis: usize,
         weight_init_enum: WeightInitEnum,
         weight_init_std: T,
@@ -63,6 +68,7 @@ where
             optimizer_enum,
             optimizer_params.to_vec(),
             use_batch_norm,
+            regularizer_enum,
             weight_init_enum,
             weight_init_std,
         );
@@ -97,7 +103,7 @@ where
                     params.weight_init_std,
                 ));
             }
-            batch_norm_layers.push(validate_batch_norm_enum(
+            batch_norm_layers.push(call_batch_norm_layer(
                 params.use_batch_norm.clone(),
                 (params.hidden_sizes[ii], params.hidden_sizes[ii]),
                 params.batch_axis,
@@ -116,7 +122,7 @@ where
             params.weight_init_enum,
             params.weight_init_std,
         ));
-        batch_norm_layers.push(validate_batch_norm_enum(
+        batch_norm_layers.push(call_batch_norm_layer(
             params.use_batch_norm.clone(),
             (params.output_size, params.output_size),
             params.batch_axis,
@@ -135,6 +141,7 @@ where
             params.hidden_sizes[params.hidden_sizes.len() - 1],
             &params.optimizer_params,
         );
+        let regularizer = call_regularizer(params.regularizer_enum);
         let nbr_of_affine_layers: usize = affine_layers.len();
         Ok(Self {
             affine_layers,
@@ -144,6 +151,8 @@ where
             loss_layer,
             optimizer_weight,
             optimizer_bias,
+            regularizer_enum: params.regularizer_enum,
+            regularizer,
             current_loss: cast_t2u(0.0),
             nbr_of_hidden_layers,
             nbr_of_affine_layers,

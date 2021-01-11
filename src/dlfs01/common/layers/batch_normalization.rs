@@ -21,8 +21,20 @@ pub enum UseBatchNormEnum<T: CrateFloat> {
     None,
 }
 
+impl<T> Display for UseBatchNormEnum<T>
+where
+    T: CrateFloat,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UseBatchNormEnum::Use(x) => write!(f, "Use (momentum: {})", x),
+            UseBatchNormEnum::None => write!(f, "None"),
+        }
+    }
+}
+
 /// validate UseBatchNormEum and generate an appropriate layer
-pub fn validate_batch_norm_enum<T: 'static, D: 'static, Sh>(
+pub fn call_batch_norm_layer<T: 'static, D: 'static, Sh>(
     use_batch_norm: UseBatchNormEnum<T>,
     shape: Sh,
     batch_axis: usize,

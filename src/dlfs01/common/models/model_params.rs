@@ -5,11 +5,11 @@
 use super::super::layers::{ActivatorEnum, UseBatchNormEnum};
 use super::super::optimizers::OptimizerEnum;
 use super::super::param_initializers::WeightInitEnum;
+use super::super::regularizers::RegularizerEnum;
 use super::super::util::*;
 use super::ModelEnum;
 use serde::Deserialize;
 use serde_json;
-// use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
@@ -27,6 +27,7 @@ pub struct ModelParameters<T: CrateFloat> {
     pub optimizer_enum: OptimizerEnum,
     pub optimizer_params: Vec<T>,
     pub use_batch_norm: UseBatchNormEnum<T>,
+    pub regularizer_enum: RegularizerEnum<T>,
     pub weight_init_enum: WeightInitEnum,
     pub weight_init_std: T,
 }
@@ -46,6 +47,7 @@ where
             optimizer_enum: OptimizerEnum::SGD,
             optimizer_params: Vec::new(),
             use_batch_norm: UseBatchNormEnum::None,
+            regularizer_enum: RegularizerEnum::None,
             weight_init_enum: WeightInitEnum::Normal,
             weight_init_std: cast_t2u(0.0),
         }
@@ -60,6 +62,7 @@ where
         optimizer_enum: OptimizerEnum,
         optimizer_params: Vec<T>,
         use_batch_norm: UseBatchNormEnum<T>,
+        regularizer_enum: RegularizerEnum<T>,
         weight_init_enum: WeightInitEnum,
         weight_init_std: T,
     ) -> Self {
@@ -73,6 +76,7 @@ where
             optimizer_enum,
             optimizer_params,
             use_batch_norm,
+            regularizer_enum,
             weight_init_enum,
             weight_init_std,
         }
@@ -118,6 +122,8 @@ where
             "parameters for optimizer: {}",
             vec_to_string(&self.optimizer_params)
         );
+        output += &format!("batch normalization: {}", self.regularizer_enum);
+        output += &format!("regularizer: {}", self.use_batch_norm);
         output += &format!("weight init type: {}", self.weight_init_enum);
         output += &format!("weight init std: {}", self.weight_init_std);
         write!(f, "{}", output)
