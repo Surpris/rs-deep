@@ -11,7 +11,7 @@
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
 use serde::Deserialize;
-use std::io;
+use std::io::{self, ErrorKind};
 use std::path::Path;
 
 use super::super::optimizers::*;
@@ -53,7 +53,7 @@ where
         weight_init_std: T,
     ) -> Self {
         assert_eq!(hidden_sizes.len(), activator_enums.len());
-        let model_parameters: ModelParameters<T> = ModelParameters::from(
+        let params: ModelParameters<T> = ModelParameters::from(
             ModelEnum::MLPClassifier,
             input_size,
             hidden_sizes.to_vec(),
@@ -66,10 +66,18 @@ where
             weight_init_enum,
             weight_init_std,
         );
-        Self::from(model_parameters)
+        match Self::from(params) {
+            Ok(x) => x,
+            Err(err) => panic!("{}", err.to_string()),
+        }
     }
-    pub fn from(params: ModelParameters<T>) -> Self {
-        assert!(params.model_enum == ModelEnum::MLPClassifier);
+    pub fn from(params: ModelParameters<T>) -> Result<Self, io::Error> {
+        if params.model_enum != ModelEnum::MLPClassifier {
+            return Err(io::Error::new(
+                ErrorKind::InvalidData,
+                "The model type specified by the input is not `MLPClassifier`.",
+            ));
+        }
         let params_clone = params.clone();
         let nbr_of_hidden_layers: usize = params.hidden_sizes.len();
         let mut affine_layers: Vec<Affine<T>> = Vec::new();
@@ -128,7 +136,7 @@ where
             &params.optimizer_params,
         );
         let nbr_of_affine_layers: usize = affine_layers.len();
-        Self {
+        Ok(Self {
             affine_layers,
             use_batch_norm: params.use_batch_norm,
             batch_norm_layers,
@@ -140,14 +148,14 @@ where
             nbr_of_hidden_layers,
             nbr_of_affine_layers,
             params: params_clone,
-        }
+        })
     }
     pub fn read_scheme_from_json(src: &Path) -> Result<Self, io::Error>
     where
         T: for<'de> Deserialize<'de>,
     {
         let params: ModelParameters<T> = ModelParameters::from_json(src)?;
-        Ok(Self::from(params))
+        Self::from(params)
     }
 }
 

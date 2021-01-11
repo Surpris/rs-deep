@@ -20,7 +20,6 @@ const EPOCHS: usize = 17;
 const HIDDEN_SIZE: usize = 50;
 const NBR_OF_ITERS: usize = 10000;
 const BATCH_SIZE: usize = 100;
-const NBR_OF_TARGET_IMAGES: usize = 60000;
 const NBR_OF_SAMPLES: usize = 500;
 const LOG_TEMPORAL_RESULT: bool = false;
 
@@ -50,12 +49,6 @@ pub fn main() {
     let input_size: usize = data_set.train_images.len_of(Axis(1));
     let output_size: usize = data_set.train_labels.len_of(Axis(1));
     let batch_axis: usize = 0;
-    let data_set: MNISTDataSet2<FF> = MNISTDataSet2 {
-        train_images: 1.0 * &data_set.train_images.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
-        train_labels: 1.0 * &data_set.train_labels.slice(s![..NBR_OF_TARGET_IMAGES, ..]),
-        test_images: data_set.test_images,
-        test_labels: data_set.test_labels,
-    };
 
     // set a parameter for training
     let nbr_train_images: usize = data_set.train_images.len_of(Axis(0));
@@ -78,7 +71,8 @@ pub fn main() {
         };
         let use_batch_norm = UseBatchNormEnum::None;
         let weight_init: WeightInitEnum = WeightInitEnum::Normal;
-        let weight_init_params: FF = 0.01;
+        let weight_init_std: FF = 0.01;
+
         model = Box::new(MLPClassifier::new(
             input_size,
             &hidden_sizes,
@@ -89,7 +83,7 @@ pub fn main() {
             use_batch_norm,
             batch_axis,
             weight_init,
-            weight_init_params,
+            weight_init_std,
         ));
     } else {
         model = match Path::new(&args[1]).canonicalize() {
@@ -100,10 +94,13 @@ pub fn main() {
                 );
                 match MLPClassifier::<FF>::read_scheme_from_json(&pb) {
                     Ok(x) => Box::new(x),
-                    Err(err) => panic!("Failure in loading the model: {}.", err.to_string()),
+                    Err(err) => panic!("Failure in loading the model: {}", err.to_string()),
                 }
             }
-            Err(err) => panic!("{}", err.to_string()),
+            Err(err) => panic!(
+                "Failure in validating the input parameter 1: {}",
+                err.to_string()
+            ),
         }
     }
     println!("Model:");
