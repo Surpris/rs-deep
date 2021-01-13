@@ -70,6 +70,7 @@ pub fn main() {
         _ => panic!(),
     };
     let use_batch_norm = UseBatchNormEnum::None;
+    let regularizer_enum: RegularizerEnum<FF> = RegularizerEnum::None;
 
     // initialize a multi-layer model
     println!("initialize a model...");
@@ -84,6 +85,7 @@ pub fn main() {
             optimizer_enum,
             &optimizer_params,
             use_batch_norm,
+            regularizer_enum,
             batch_axis,
             weight_init,
             weight_init_params,

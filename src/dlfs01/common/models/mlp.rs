@@ -141,7 +141,7 @@ where
             params.hidden_sizes[params.hidden_sizes.len() - 1],
             &params.optimizer_params,
         );
-        let regularizer = call_regularizer(params.regularizer_enum);
+        let regularizer = call_regularizer(params.regularizer_enum.clone());
         let nbr_of_affine_layers: usize = affine_layers.len();
         Ok(Self {
             affine_layers,

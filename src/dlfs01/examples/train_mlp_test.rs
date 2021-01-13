@@ -70,6 +70,7 @@ pub fn main() {
             _ => panic!(),
         };
         let use_batch_norm = UseBatchNormEnum::None;
+        let regularizer_enum: RegularizerEnum<FF> = RegularizerEnum::None;
         let weight_init: WeightInitEnum = WeightInitEnum::Normal;
         let weight_init_std: FF = 0.01;
 
@@ -81,6 +82,7 @@ pub fn main() {
             optimizer_enum,
             &optimizer_params,
             use_batch_norm,
+            regularizer_enum,
             batch_axis,
             weight_init,
             weight_init_std,
