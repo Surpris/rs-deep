@@ -34,6 +34,7 @@ pub struct MLPClassifier<T: 'static + CrateFloat> {
     optimizer_bias: Box<dyn OptimizerBase<Src = Array1<T>>>,
     regularizer_enum: RegularizerEnum<T>,
     regularizer: Box<dyn RegularizerBase<T, A = Array2<T>>>,
+    current_regularizer_value: T,
     current_loss: T,
     nbr_of_hidden_layers: usize,
     nbr_of_affine_layers: usize,
@@ -153,6 +154,7 @@ where
             optimizer_bias,
             regularizer_enum: params.regularizer_enum,
             regularizer,
+            current_regularizer_value: cast_t2u(0.0),
             current_loss: cast_t2u(0.0),
             nbr_of_hidden_layers,
             nbr_of_affine_layers,
@@ -184,6 +186,8 @@ where
         for ii in 0..self.nbr_of_hidden_layers {
             y = self.activators[ii].forward(&y);
             y = self.affine_layers[ii + 1].forward(&y);
+            self.current_regularizer_value +=
+                self.regularizer.forward(&self.affine_layers[ii + 1].weight);
             if self.use_batch_norm != UseBatchNormEnum::None {
                 y = self.batch_norm_layers[ii + 1].forward(&y);
             }
@@ -205,7 +209,15 @@ where
     fn loss(&mut self, x: &Self::A, t: &Self::B) -> T {
         let y: Self::B = self.predict_prob(&x);
         self.current_loss = self.loss_layer.forward(&y, &t);
-        self.current_loss
+        if self.regularizer_enum != RegularizerEnum::None {
+            self.current_regularizer_value = cast_t2u(0.0);
+            for layer in self.affine_layers.iter() {
+                self.current_regularizer_value += self.regularizer.forward(&layer.weight);
+            }
+            self.current_loss + self.current_regularizer_value
+        } else {
+            self.current_loss
+        }
     }
 
     fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T {
@@ -233,12 +245,18 @@ where
                 _dx = self.batch_norm_layers[self.nbr_of_affine_layers - 1 - ii].backward(&_dx);
             }
             _dx = self.affine_layers[self.nbr_of_affine_layers - 1 - ii].backward(&_dx);
+
             _dx = self.activators[self.nbr_of_hidden_layers - 1 - ii].backward(&_dx);
         }
         if self.use_batch_norm != UseBatchNormEnum::None {
             _dx = self.batch_norm_layers[0].backward(&_dx);
         }
         _dx = self.affine_layers[0].backward(&_dx);
+        if self.regularizer_enum != RegularizerEnum::None {
+            for layer in self.affine_layers.iter_mut() {
+                layer.dw = self.regularizer.backward(&layer.weight) + &layer.dw;
+            }
+        }
     }
 
     fn update(&mut self, x: &Self::A, t: &Self::B) {

@@ -69,7 +69,7 @@ pub fn main() {
             OptimizerEnum::Adam => vec![0.001, 0.9, 0.999],
             _ => panic!(),
         };
-        let use_batch_norm = UseBatchNormEnum::None;
+        let use_batch_norm = UseBatchNormEnum::Use(0.9);
         let regularizer_enum: RegularizerEnum<FF> = RegularizerEnum::None;
         let weight_init: WeightInitEnum = WeightInitEnum::Normal;
         let weight_init_std: FF = 0.01;
