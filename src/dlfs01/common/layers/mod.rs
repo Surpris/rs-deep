@@ -20,7 +20,7 @@ pub use activation::{
 pub use affine::Affine;
 pub use batch_normalization::{call_batch_norm_layer, BatchNormalization, UseBatchNormEnum};
 pub use convolution::Convolution;
-pub use dropout::DropOut;
+pub use dropout::{call_dropout_layer, DropOut, UseDropoutEnum};
 pub use layer_base::{LayerBase, LossLayerBase};
 use ndarray::{prelude::*, RemoveAxis};
 pub use pooling::{MaxPooling, MeanPooling, MinPooling};

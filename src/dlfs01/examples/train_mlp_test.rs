@@ -68,6 +68,7 @@ pub fn main() {
         // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::RMSprop(0.01, 0.99);
         // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::Adam(0.001, 0.9, 0.999);
         let use_batch_norm: UseBatchNormEnum<FF> = UseBatchNormEnum::Use(0.9);
+        let use_dropout: UseDropoutEnum<FF> = UseDropoutEnum::None;
         let regularizer_enum: RegularizerEnum<FF> = RegularizerEnum::None;
         let weight_init: WeightInitEnum = WeightInitEnum::Normal;
         let weight_init_std: FF = 0.01;
@@ -79,6 +80,7 @@ pub fn main() {
             &activator_enums,
             optimizer_enum,
             use_batch_norm,
+            use_dropout,
             regularizer_enum,
             batch_axis,
             weight_init,

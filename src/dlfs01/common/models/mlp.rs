@@ -26,9 +26,9 @@ use super::{super::layers::*, ModelEnum};
 /// MLP classifier
 pub struct MLPClassifier<T: 'static + CrateFloat> {
     affine_layers: Vec<Affine<T>>,
-    use_batch_norm: UseBatchNormEnum<T>,
     batch_norm_layers: Vec<BatchNormalization<T, Ix2>>,
     activators: Vec<Box<dyn LayerBase<T, A = Array2<T>, B = Array2<T>>>>,
+    dropout_layers: Vec<DropOut<T, Ix2>>,
     loss_layer: Box<dyn LossLayerBase<T, A = Array2<T>>>,
     optimizer_weight: Box<dyn OptimizerBase<Src = Array2<T>>>,
     optimizer_bias: Box<dyn OptimizerBase<Src = Array1<T>>>,
@@ -52,6 +52,7 @@ where
         activator_enums: &[ActivatorEnum],
         optimizer_enum: OptimizerEnum<T>,
         use_batch_norm: UseBatchNormEnum<T>,
+        use_dropout: UseDropoutEnum<T>,
         regularizer_enum: RegularizerEnum<T>,
         batch_axis: usize,
         weight_init_enum: WeightInitEnum,
@@ -67,6 +68,7 @@ where
             activator_enums.to_vec(),
             optimizer_enum,
             use_batch_norm,
+            use_dropout,
             regularizer_enum,
             weight_init_enum,
             weight_init_std,
@@ -88,6 +90,7 @@ where
         let mut affine_layers: Vec<Affine<T>> = Vec::new();
         let mut activators: Vec<Box<dyn LayerBase<T, A = Array2<T>, B = Array2<T>>>> = Vec::new();
         let mut batch_norm_layers: Vec<BatchNormalization<T, Ix2>> = Vec::new();
+        let mut dropout_layers: Vec<DropOut<T, Ix2>> = Vec::new();
         for ii in 0..nbr_of_hidden_layers {
             if ii == 0 {
                 affine_layers.push(Affine::new(
@@ -112,6 +115,10 @@ where
                 (params.hidden_sizes[ii], params.hidden_sizes[ii]),
                 params.batch_axis,
             ));
+            dropout_layers.push(call_dropout_layer(
+                params.use_dropout.clone(),
+                (params.hidden_sizes[ii], params.hidden_sizes[ii]),
+            ));
         }
         affine_layers.push(Affine::new(
             (
@@ -121,11 +128,15 @@ where
             params.weight_init_enum,
             params.weight_init_std,
         ));
-        batch_norm_layers.push(call_batch_norm_layer(
-            params.use_batch_norm.clone(),
-            (params.output_size, params.output_size),
-            params.batch_axis,
-        ));
+        // batch_norm_layers.push(call_batch_norm_layer(
+        //     params.use_batch_norm.clone(),
+        //     (params.output_size, params.output_size),
+        //     params.batch_axis,
+        // ));
+        // dropout_layers.push(call_dropout_layer(
+        //     params.use_dropout.clone(),
+        //     (params.output_size, params.output_size),
+        // ));
         let loss_layer = Box::new(SoftmaxWithLoss2::new(
             (params.output_size, params.output_size),
             params.batch_axis,
@@ -142,9 +153,9 @@ where
         let nbr_of_affine_layers: usize = affine_layers.len();
         Ok(Self {
             affine_layers,
-            use_batch_norm: params.use_batch_norm,
             batch_norm_layers,
             activators,
+            dropout_layers,
             loss_layer,
             optimizer_weight,
             optimizer_bias,
@@ -175,20 +186,28 @@ where
     type B = Array2<T>;
 
     fn predict_prob(&mut self, x: &Self::A) -> Self::B {
+        // The first layer set
         let mut y: Self::B = self.affine_layers[0].forward(x);
-        if self.use_batch_norm != UseBatchNormEnum::None {
+        if self.params.use_batch_norm != UseBatchNormEnum::None {
             y = self.batch_norm_layers[0].forward(&y);
         }
-        for ii in 0..self.nbr_of_hidden_layers {
-            y = self.activators[ii].forward(&y);
-            y = self.affine_layers[ii + 1].forward(&y);
-            self.current_regularizer_value +=
-                self.regularizer.forward(&self.affine_layers[ii + 1].weight);
-            if self.use_batch_norm != UseBatchNormEnum::None {
+        y = self.activators[0].forward(&y);
+        if self.params.use_dropout != UseDropoutEnum::None {
+            y = self.dropout_layers[0].forward(&y);
+        }
+        // Hidden layer sets
+        for ii in 1..self.nbr_of_hidden_layers {
+            y = self.affine_layers[ii].forward(&y);
+            if self.params.use_batch_norm != UseBatchNormEnum::None {
                 y = self.batch_norm_layers[ii + 1].forward(&y);
             }
+            y = self.activators[ii].forward(&y);
+            if self.params.use_dropout != UseDropoutEnum::None {
+                y = self.dropout_layers[ii].forward(&y);
+            }
         }
-        y
+        // The last Affine layer
+        self.affine_layers[self.nbr_of_affine_layers - 1].forward(&y)
     }
 
     fn predict(&mut self, x: &Self::A) -> Self::B {
@@ -236,16 +255,15 @@ where
         // backward
         let _dx: T = cast_t2u(1.0);
         let mut _dx: Self::B = self.loss_layer.backward(_dx);
-        for ii in 0..self.activators.len() {
-            if self.use_batch_norm != UseBatchNormEnum::None {
-                _dx = self.batch_norm_layers[self.nbr_of_affine_layers - 1 - ii].backward(&_dx);
-            }
+        for ii in 0..self.nbr_of_hidden_layers {
             _dx = self.affine_layers[self.nbr_of_affine_layers - 1 - ii].backward(&_dx);
-
+            if self.params.use_dropout != UseDropoutEnum::None {
+                _dx = self.dropout_layers[self.nbr_of_hidden_layers - 1 - ii].backward(&_dx);
+            }
             _dx = self.activators[self.nbr_of_hidden_layers - 1 - ii].backward(&_dx);
-        }
-        if self.use_batch_norm != UseBatchNormEnum::None {
-            _dx = self.batch_norm_layers[0].backward(&_dx);
+            if self.params.use_batch_norm != UseBatchNormEnum::None {
+                _dx = self.batch_norm_layers[self.nbr_of_hidden_layers - 1 - ii].backward(&_dx);
+            }
         }
         _dx = self.affine_layers[0].backward(&_dx);
         if self.regularizer_enum != RegularizerEnum::None {
@@ -262,7 +280,7 @@ where
                 .update(&mut layer.weight, &mut layer.dw);
             self.optimizer_bias.update(&mut layer.bias, &mut layer.db);
         }
-        if self.use_batch_norm != UseBatchNormEnum::None {
+        if self.params.use_batch_norm != UseBatchNormEnum::None {
             for layer in self.batch_norm_layers.iter_mut() {
                 self.optimizer_bias
                     .update(&mut layer.gamma, &mut layer.dgamma);
@@ -272,19 +290,32 @@ where
         }
     }
 
+    fn set_trainable(&mut self, flag: bool) {
+        if self.params.use_batch_norm != UseBatchNormEnum::None {
+            for layer in self.batch_norm_layers.iter_mut() {
+                layer.set_trainable(flag);
+            }
+        }
+        if self.params.use_dropout != UseDropoutEnum::None {
+            for layer in self.dropout_layers.iter_mut() {
+                layer.set_trainable(flag);
+            }
+        }
+    }
+
     fn print_detail(&self) {
         println!("MLP classifier.");
-        for ii in 0..self.activators.len() {
+        for ii in 0..self.nbr_of_hidden_layers {
             self.affine_layers[ii].print_detail();
-            if self.use_batch_norm != UseBatchNormEnum::None {
+            if self.params.use_batch_norm != UseBatchNormEnum::None {
                 self.batch_norm_layers[ii].print_detail();
             }
             self.activators[ii].print_detail();
+            if self.params.use_dropout != UseDropoutEnum::None {
+                self.dropout_layers[ii].print_detail();
+            }
         }
         self.affine_layers[self.nbr_of_affine_layers - 1].print_detail();
-        if self.use_batch_norm != UseBatchNormEnum::None {
-            self.batch_norm_layers[self.nbr_of_affine_layers - 1].print_detail();
-        }
         self.loss_layer.print_detail();
     }
 
@@ -296,14 +327,12 @@ where
         }
         println!("Layer {}:", self.affine_layers.len() - 1);
         self.affine_layers[self.affine_layers.len() - 1].print_parameters();
-        if self.use_batch_norm != UseBatchNormEnum::None {
+        if self.params.use_batch_norm != UseBatchNormEnum::None {
             println!("BatchNormalization layers:");
-            for ii in 0..self.nbr_of_hidden_layers {
+            for ii in 0..self.batch_norm_layers.len() - 1 {
                 println!("Layer {}:", ii);
                 self.batch_norm_layers[ii].print_parameters();
             }
-            println!("Layer {}:", self.batch_norm_layers.len() - 1);
-            self.batch_norm_layers[self.batch_norm_layers.len() - 1].print_parameters();
         }
     }
 
@@ -314,6 +343,7 @@ where
     fn get_output(&self) -> Self::B {
         self.loss_layer.get_output()
     }
+
     fn write_scheme_to_json(&self, dst: &Path) -> Result<(), io::Error> {
         self.params.to_json(dst)?;
         Ok(())

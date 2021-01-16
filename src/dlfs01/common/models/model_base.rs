@@ -18,6 +18,9 @@ pub trait ModelBase<T: CrateFloat> {
     fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T;
     fn gradient(&mut self, x: &Self::A, t: &Self::B);
     fn update(&mut self, x: &Self::A, t: &Self::B);
+    fn set_trainable(&mut self, _flag: bool) {
+        return;
+    }
     fn print_detail(&self) {
         return;
     }

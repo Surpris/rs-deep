@@ -64,6 +64,7 @@ pub fn main() {
     let activator_enums: [ActivatorEnum; 1] = [ActivatorEnum::ReLU];
     let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::SGD(0.1);
     let use_batch_norm: UseBatchNormEnum<FF> = UseBatchNormEnum::None;
+    let use_dropout_enum: UseDropoutEnum<FF> = UseDropoutEnum::None;
     let regularizer_enum: RegularizerEnum<FF> = RegularizerEnum::None;
 
     // initialize a multi-layer model
@@ -78,6 +79,7 @@ pub fn main() {
             &activator_enums,
             optimizer_enum,
             use_batch_norm,
+            use_dropout_enum,
             regularizer_enum,
             batch_axis,
             weight_init,

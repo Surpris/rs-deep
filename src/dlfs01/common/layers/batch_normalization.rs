@@ -66,7 +66,7 @@ pub struct BatchNormalization<T: CrateFloat, D: Dimension + RemoveAxis> {
     xc: Array<T, D>,
     xn: Array<T, D>,
     std: Array<T, D::Smaller>,
-    trained: bool,
+    trainable: bool,
     eps: T,
     batch_size_t: T,
     one: T,
@@ -105,7 +105,7 @@ where
             std: zeros.clone(),
             dgamma: ones.clone(),
             dbeta: zeros.clone(),
-            trained: false,
+            trainable: true,
             eps: cast_t2u(EPS),
             batch_size_t: one,
             one,
@@ -128,7 +128,7 @@ where
     type B = Array<T, D>;
 
     fn forward(&mut self, x: &Self::A) -> Self::B {
-        if !self.trained {
+        if self.trainable {
             let mu: Array<T, D::Smaller> = x.mean_axis(Axis(self.batch_axis)).unwrap();
             let xc: Self::B = x.clone() - &mu;
             let var: Array<T, D::Smaller> =
@@ -144,7 +144,7 @@ where
             self.running_mean *= self.momentum;
             self.running_mean.scaled_add(self.one_minus_m, &mu);
             self.running_var *= self.momentum;
-            self.running_var.scaled_add(self.one_minus_m, &mu);
+            self.running_var.scaled_add(self.one_minus_m, &var);
             xn * &self.gamma + &self.beta
         } else {
             let xn: Self::B =
@@ -164,6 +164,10 @@ where
         dxc.scaled_add(self.two / self.batch_size_t, &(self.xc.clone() * &dvar));
         let dmu: Array<T, D::Smaller> = dxc.sum_axis(Axis(self.batch_axis));
         dxc - &(dmu / self.batch_size_t)
+    }
+
+    fn set_trainable(&mut self, flag: bool) {
+        self.trainable = flag;
     }
 
     fn print_detail(&self) {

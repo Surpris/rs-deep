@@ -2,7 +2,7 @@
 //!
 //! Parameters for initialization of models
 
-use super::super::layers::{ActivatorEnum, UseBatchNormEnum};
+use super::super::layers::{ActivatorEnum, UseBatchNormEnum, UseDropoutEnum};
 use super::super::optimizers::OptimizerEnum;
 use super::super::param_initializers::WeightInitEnum;
 use super::super::regularizers::RegularizerEnum;
@@ -26,6 +26,7 @@ pub struct ModelParameters<T: CrateFloat> {
     pub activator_enums: Vec<ActivatorEnum>,
     pub optimizer_enum: OptimizerEnum<T>,
     pub use_batch_norm: UseBatchNormEnum<T>,
+    pub use_dropout: UseDropoutEnum<T>,
     pub regularizer_enum: RegularizerEnum<T>,
     pub weight_init_enum: WeightInitEnum,
     pub weight_init_std: T,
@@ -45,6 +46,7 @@ where
             activator_enums: Vec::new(),
             optimizer_enum: OptimizerEnum::SGD(cast_t2u(0.01)),
             use_batch_norm: UseBatchNormEnum::None,
+            use_dropout: UseDropoutEnum::None,
             regularizer_enum: RegularizerEnum::None,
             weight_init_enum: WeightInitEnum::Normal,
             weight_init_std: cast_t2u(0.0),
@@ -59,6 +61,7 @@ where
         activator_enums: Vec<ActivatorEnum>,
         optimizer_enum: OptimizerEnum<T>,
         use_batch_norm: UseBatchNormEnum<T>,
+        use_dropout: UseDropoutEnum<T>,
         regularizer_enum: RegularizerEnum<T>,
         weight_init_enum: WeightInitEnum,
         weight_init_std: T,
@@ -72,6 +75,7 @@ where
             activator_enums,
             optimizer_enum,
             use_batch_norm,
+            use_dropout,
             regularizer_enum,
             weight_init_enum,
             weight_init_std,
@@ -114,8 +118,9 @@ where
             vec_to_string(&self.activator_enums)
         );
         output += &format!("type of optimizer: {}", self.optimizer_enum);
-        output += &format!("batch normalization: {}", self.regularizer_enum);
-        output += &format!("regularizer: {}", self.use_batch_norm);
+        output += &format!("batch normalization: {}", self.use_batch_norm);
+        output += &format!("dropout: {}", self.use_dropout);
+        output += &format!("regularizer: {}", self.regularizer_enum);
         output += &format!("weight init type: {}", self.weight_init_enum);
         output += &format!("weight init std: {}", self.weight_init_std);
         write!(f, "{}", output)

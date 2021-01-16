@@ -165,12 +165,14 @@ where
         self.current_iter += 1;
     }
     pub fn train(&mut self, model: &mut Box<dyn ModelBase<T, A = Array<T, D1>, B = Array<T, D2>>>) {
+        model.set_trainable(true);
         let start = Instant::now();
         for _ in 0..self.max_iter {
             self.train_step(model);
         }
         let end = start.elapsed();
         self.elapsed_time = end.as_secs() as f64 + end.subsec_micros() as f64 * 1E-6;
+        model.set_trainable(false);
     }
     pub fn get_results(&self) -> TrainResult<T> {
         TrainResult {

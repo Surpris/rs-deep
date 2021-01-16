@@ -27,6 +27,9 @@ pub use crate::dlfs01::common::layers::batch_normalization::{
 };
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::layers::dropout::{call_dropout_layer, DropOut, UseDropoutEnum};
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::layers::layer_base::{LayerBase, LossLayerBase};
 
 #[doc(no_inline)]
