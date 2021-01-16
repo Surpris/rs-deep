@@ -45,7 +45,7 @@ where
         dx.clone()
     }
     fn print_detail(&self) {
-        println!("sigmoid activation layer.");
+        println!("Identity activation layer.");
     }
 }
 

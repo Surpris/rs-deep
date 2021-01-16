@@ -5,6 +5,8 @@
 #![allow(unused_variables)]
 
 use super::super::util::*;
+use std::io;
+use std::path::Path;
 
 /// Arbitrary-D model trait
 pub trait ModelBase<T: CrateFloat> {
@@ -16,6 +18,9 @@ pub trait ModelBase<T: CrateFloat> {
     fn accuracy(&mut self, x: &Self::A, t: &Self::B) -> T;
     fn gradient(&mut self, x: &Self::A, t: &Self::B);
     fn update(&mut self, x: &Self::A, t: &Self::B);
+    fn set_trainable(&mut self, _flag: bool) {
+        return;
+    }
     fn print_detail(&self) {
         return;
     }
@@ -26,4 +31,5 @@ pub trait ModelBase<T: CrateFloat> {
         cast_t2u(0.0)
     }
     fn get_output(&self) -> Self::B;
+    fn write_scheme_to_json(&self, dst: &Path) -> Result<(), io::Error>;
 }

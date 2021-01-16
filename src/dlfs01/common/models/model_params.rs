@@ -2,24 +2,32 @@
 //!
 //! Parameters for initialization of models
 
-use super::super::layers::ActivatorEnum;
+use super::super::layers::{ActivatorEnum, UseBatchNormEnum, UseDropoutEnum};
 use super::super::optimizers::OptimizerEnum;
 use super::super::param_initializers::WeightInitEnum;
+use super::super::regularizers::RegularizerEnum;
 use super::super::util::*;
 use super::ModelEnum;
-use std::fmt::Display;
+use serde::Deserialize;
+use serde_json;
+use std::fs::File;
+use std::io;
+use std::io::prelude::*;
+use std::{fmt::Display, path::Path};
 
 /// Model parameters
-#[derive(Clone, Debug)]
-pub struct ModelParameters<T: 'static + CrateFloat> {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ModelParameters<T: CrateFloat> {
     pub model_enum: ModelEnum,
     pub input_size: usize,
     pub hidden_sizes: Vec<usize>,
     pub output_size: usize,
     pub batch_axis: usize,
     pub activator_enums: Vec<ActivatorEnum>,
-    pub optimizer_enum: OptimizerEnum,
-    pub optimizer_params: Vec<T>,
+    pub optimizer_enum: OptimizerEnum<T>,
+    pub use_batch_norm: UseBatchNormEnum<T>,
+    pub use_dropout: UseDropoutEnum<T>,
+    pub regularizer_enum: RegularizerEnum<T>,
     pub weight_init_enum: WeightInitEnum,
     pub weight_init_std: T,
 }
@@ -36,8 +44,10 @@ where
             output_size: 0,
             batch_axis: 0,
             activator_enums: Vec::new(),
-            optimizer_enum: OptimizerEnum::SGD,
-            optimizer_params: Vec::new(),
+            optimizer_enum: OptimizerEnum::SGD(cast_t2u(0.01)),
+            use_batch_norm: UseBatchNormEnum::None,
+            use_dropout: UseDropoutEnum::None,
+            regularizer_enum: RegularizerEnum::None,
             weight_init_enum: WeightInitEnum::Normal,
             weight_init_std: cast_t2u(0.0),
         }
@@ -49,8 +59,10 @@ where
         output_size: usize,
         batch_axis: usize,
         activator_enums: Vec<ActivatorEnum>,
-        optimizer_enum: OptimizerEnum,
-        optimizer_params: Vec<T>,
+        optimizer_enum: OptimizerEnum<T>,
+        use_batch_norm: UseBatchNormEnum<T>,
+        use_dropout: UseDropoutEnum<T>,
+        regularizer_enum: RegularizerEnum<T>,
         weight_init_enum: WeightInitEnum,
         weight_init_std: T,
     ) -> Self {
@@ -62,10 +74,28 @@ where
             batch_axis,
             activator_enums,
             optimizer_enum,
-            optimizer_params,
+            use_batch_norm,
+            use_dropout,
+            regularizer_enum,
             weight_init_enum,
             weight_init_std,
         }
+    }
+    pub fn from_json(src: &Path) -> Result<Self, io::Error>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        let mut file: File = File::open(src)?;
+        let mut buff: String = String::new();
+        let _ = file.read_to_string(&mut buff);
+        let dst: Self = serde_json::from_reader(buff.as_bytes())?;
+        Ok(dst)
+    }
+    pub fn to_json(&self, dst: &Path) -> Result<(), io::Error> {
+        let mut file: File = File::create(dst)?;
+        write!(file, "{}", serde_json::to_string(&self)?)?;
+        file.flush()?;
+        Ok(())
     }
 }
 
@@ -88,10 +118,9 @@ where
             vec_to_string(&self.activator_enums)
         );
         output += &format!("type of optimizer: {}", self.optimizer_enum);
-        output += &format!(
-            "parameters for optimizer: {}",
-            vec_to_string(&self.optimizer_params)
-        );
+        output += &format!("batch normalization: {}", self.use_batch_norm);
+        output += &format!("dropout: {}", self.use_dropout);
+        output += &format!("regularizer: {}", self.regularizer_enum);
         output += &format!("weight init type: {}", self.weight_init_enum);
         output += &format!("weight init std: {}", self.weight_init_std);
         write!(f, "{}", output)

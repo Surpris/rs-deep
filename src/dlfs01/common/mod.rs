@@ -13,5 +13,6 @@ pub mod models;
 pub mod operators;
 pub mod optimizers;
 pub mod param_initializers;
+pub mod regularizers;
 pub mod trainers;
 pub mod util;

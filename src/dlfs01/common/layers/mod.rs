@@ -18,9 +18,9 @@ pub use activation::{
     SoftmaxD,
 };
 pub use affine::Affine;
-pub use batch_normalization::BatchNormalization;
+pub use batch_normalization::{call_batch_norm_layer, BatchNormalization, UseBatchNormEnum};
 pub use convolution::Convolution;
-pub use dropout::DropOut;
+pub use dropout::{call_dropout_layer, DropOut, UseDropoutEnum};
 pub use layer_base::{LayerBase, LossLayerBase};
 use ndarray::{prelude::*, RemoveAxis};
 pub use pooling::{MaxPooling, MeanPooling, MinPooling};
@@ -31,7 +31,7 @@ pub use softmax_with_loss::{
 use std::fmt::Display;
 
 /// Enum of basic layers
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum BasicLayerEnum {
     Affine = 0,
     Convolution = 1,
@@ -47,7 +47,7 @@ impl Display for BasicLayerEnum {
 }
 
 /// Enum of activators
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ActivatorEnum {
     Identity = 0,
     ReLU = 1,

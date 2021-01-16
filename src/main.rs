@@ -6,7 +6,8 @@
 extern crate ndarray;
 
 extern crate rs_deep;
-// use rs_deep::prelude::*;
+use rs_deep::prelude::*;
+use serde_json;
 
 // use std::collections::HashMap;
 // use num_traits::Float;
@@ -54,7 +55,8 @@ fn main() {
 
     // chapter 06
     // rs_deep::dlfs01::ch06::optimizer_compare_mnist::main();
-    rs_deep::dlfs01::ch06::weight_init_compare::main();
+    // rs_deep::dlfs01::ch06::weight_init_compare::main();
+    // rs_deep::dlfs01::ch06::batch_norm_test::main();
 
     // common
     // rs_deep::dlfs01::common::models::mlp::main();
@@ -62,5 +64,17 @@ fn main() {
     // dataset
     // rs_deep::dlfs01::dataset::mnist_vec::main();
 
-    // test
+    // examples
+    rs_deep::dlfs01::examples::train_mlp_test::main();
+
+    // common
+    // rs_deep::dlfs01::common::models::mlp::main();
+
+fn test() {
+    let a: ModelParameters<f32> = ModelParameters::new();
+    println!("{:?}", a);
+    let b = serde_json::to_string(&a).unwrap();
+    println!("{}", b);
+    let c: ModelParameters<f32> = serde_json::from_str(&b).unwrap();
+    println!("{:?}", c);
 }

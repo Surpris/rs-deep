@@ -102,13 +102,17 @@ pub fn test_mlp() {
     println!("< ch06 mlp sub module >");
     let weight_init: WeightInitEnum = WeightInitEnum::Normal;
     let weight_init_params: f32 = 1.0;
+    let use_batch_norm: UseBatchNormEnum<f32> = UseBatchNormEnum::None;
+    let use_dropout: UseDropoutEnum<f32> = UseDropoutEnum::None;
     let mut net: MLPClassifier<f32> = MLPClassifier::new(
         2,
         &[10],
         3,
         &[ActivatorEnum::ReLU],
-        OptimizerEnum::SGD,
-        &[1.0],
+        OptimizerEnum::SGD(0.1),
+        use_batch_norm,
+        use_dropout,
+        RegularizerEnum::None,
         0,
         weight_init,
         weight_init_params,

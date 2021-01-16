@@ -15,6 +15,9 @@ pub trait LayerBase<T: CrateFloat> {
     fn update(&mut self, lr: T) {
         return;
     }
+    fn set_trainable(&mut self, _flag: bool) {
+        return;
+    }
     fn print_detail(&self) {
         return;
     }

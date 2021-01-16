@@ -22,6 +22,14 @@ pub use crate::dlfs01::common::layers::activation::{
 pub use crate::dlfs01::common::layers::affine::Affine;
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::layers::batch_normalization::{
+    call_batch_norm_layer, BatchNormalization, UseBatchNormEnum,
+};
+
+#[doc(no_inline)]
+pub use crate::dlfs01::common::layers::dropout::{call_dropout_layer, DropOut, UseDropoutEnum};
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::layers::layer_base::{LayerBase, LossLayerBase};
 
 #[doc(no_inline)]
@@ -31,13 +39,16 @@ pub use crate::dlfs01::common::layers::softmax_with_loss::{
 };
 
 #[doc(no_inline)]
+pub use crate::dlfs01::common::models::mlp::MLPClassifier;
+
+#[doc(no_inline)]
 pub use crate::dlfs01::common::models::ModelEnum;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::models::model_base::ModelBase;
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::models::mlp::MLPClassifier;
+pub use crate::dlfs01::common::models::model_params::ModelParameters;
 
 #[doc(no_inline)]
 pub use crate::dlfs01::common::optimizers::{call_optimizer, OptimizerEnum};
@@ -59,6 +70,11 @@ pub use crate::dlfs01::common::param_initializers::ndarray_init::{
 #[doc(no_inline)]
 pub use crate::dlfs01::common::param_initializers::weight_init::{
     initialize_weight, WeightInitEnum,
+};
+
+#[doc(no_inline)]
+pub use crate::dlfs01::common::regularizers::{
+    call_regularizer, L1Norm, L2Norm, RegularizerBase, RegularizerEnum,
 };
 
 #[doc(no_inline)]

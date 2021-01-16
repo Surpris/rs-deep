@@ -27,8 +27,6 @@ where
     T: CrateFloat,
 {
     pub fn new(shape: (usize, usize), weight_init: WeightInitEnum, weight_init_std: T) -> Self {
-        // let mut rng = rand::thread_rng();
-        // let gen = Uniform::new(-1.0f32, 1.0f32);
         Affine {
             weight: initialize_weight(weight_init.clone(), weight_init_std, shape),
             bias: initialize_weight(weight_init, weight_init_std, shape.1),
@@ -58,11 +56,6 @@ where
     fn forward(&mut self, x: &Self::A) -> Self::B {
         self.buff = x.clone();
         x.dot(&self.weight) + &self.bias
-        // let mut dst: Array2<T> = x.dot(&self.weight);
-        // for v in dst.indexed_iter_mut() {
-        //     *v.1 = *v.1 + self.bias[v.0 .1];
-        // }
-        // dst
     }
     fn backward(&mut self, dx: &Self::B) -> Self::A {
         let dst = dx.dot(&self.weight.t());
@@ -73,12 +66,6 @@ where
     fn update(&mut self, lr: T) {
         self.weight.scaled_add(-lr, &self.dw);
         self.bias.scaled_add(-lr, &self.db);
-        // for v in self.weight.indexed_iter_mut() {
-        //     *v.1 = *v.1 - lr * self.dw[v.0];
-        // }
-        // for v in self.bias.indexed_iter_mut() {
-        //     *v.1 = *v.1 - lr * self.db[v.0];
-        // }
     }
     fn print_detail(&self) {
         println!("affine layer.");

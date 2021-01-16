@@ -10,6 +10,7 @@ pub mod ch05;
 pub mod ch06;
 pub mod common;
 pub mod dataset;
+pub mod examples;
 
 pub use common::gradient;
 pub use common::loss_function::LossFunc;
