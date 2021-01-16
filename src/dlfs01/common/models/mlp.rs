@@ -50,8 +50,7 @@ where
         hidden_sizes: &[usize],
         output_size: usize,
         activator_enums: &[ActivatorEnum],
-        optimizer_enum: OptimizerEnum,
-        optimizer_params: &[T],
+        optimizer_enum: OptimizerEnum<T>,
         use_batch_norm: UseBatchNormEnum<T>,
         regularizer_enum: RegularizerEnum<T>,
         batch_axis: usize,
@@ -67,7 +66,6 @@ where
             batch_axis,
             activator_enums.to_vec(),
             optimizer_enum,
-            optimizer_params.to_vec(),
             use_batch_norm,
             regularizer_enum,
             weight_init_enum,
@@ -135,12 +133,10 @@ where
         let optimizer_weight = call_optimizer(
             params.optimizer_enum.clone(),
             (params.output_size, params.output_size),
-            &params.optimizer_params,
         );
         let optimizer_bias = call_optimizer(
             params.optimizer_enum,
             params.hidden_sizes[params.hidden_sizes.len() - 1],
-            &params.optimizer_params,
         );
         let regularizer = call_regularizer(params.regularizer_enum.clone());
         let nbr_of_affine_layers: usize = affine_layers.len();

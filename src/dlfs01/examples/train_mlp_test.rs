@@ -61,15 +61,13 @@ pub fn main() {
         // set activators and optimizers
         let hidden_sizes: [usize; 1] = [HIDDEN_SIZE];
         let activator_enums: [ActivatorEnum; 1] = [ActivatorEnum::ReLU];
-        let optimizer_enum: OptimizerEnum = OptimizerEnum::SGD;
-        let optimizer_params: Vec<FF> = match optimizer_enum {
-            OptimizerEnum::SGD | OptimizerEnum::AdaGrad => vec![0.1],
-            OptimizerEnum::Momentum | OptimizerEnum::Nesterov => vec![0.01, 0.9],
-            OptimizerEnum::RMSprop => vec![0.01, 0.99],
-            OptimizerEnum::Adam => vec![0.001, 0.9, 0.999],
-            _ => panic!(),
-        };
-        let use_batch_norm = UseBatchNormEnum::Use(0.9);
+        let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::SGD(0.1);
+        // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::AdaGrad(0.1);
+        // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::Momentum(0.01, 0.9);
+        // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::Nesterov(0.01, 0.9);
+        // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::RMSprop(0.01, 0.99);
+        // let optimizer_enum: OptimizerEnum<FF> = OptimizerEnum::Adam(0.001, 0.9, 0.999);
+        let use_batch_norm: UseBatchNormEnum<FF> = UseBatchNormEnum::Use(0.9);
         let regularizer_enum: RegularizerEnum<FF> = RegularizerEnum::None;
         let weight_init: WeightInitEnum = WeightInitEnum::Normal;
         let weight_init_std: FF = 0.01;
@@ -80,7 +78,6 @@ pub fn main() {
             output_size,
             &activator_enums,
             optimizer_enum,
-            &optimizer_params,
             use_batch_norm,
             regularizer_enum,
             batch_axis,
@@ -111,7 +108,7 @@ pub fn main() {
     // model.print_parameters();
 
     // initialize a TrainResult instance
-    let mut trainer: Trainer<FF, Ix2, Ix2> = Trainer::new(
+    let mut trainer = Trainer::new(
         data_set.train_images.clone(),
         data_set.train_labels.clone(),
         data_set.test_images.clone(),

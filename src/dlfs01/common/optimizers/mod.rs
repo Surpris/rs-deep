@@ -13,85 +13,103 @@ use std::fmt::Display;
 
 /// Enum of optimizers
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub enum OptimizerEnum {
-    SGD = 0,
-    Momentum = 1,
-    Nesterov = 2,
-    AdaGrad = 3,
-    RMSprop = 4,
-    AdaDelta = 5,
-    Adam = 6,
-    RMSpropGraves = 7,
-    SMORMS3 = 8,
-    AdaMax = 9,
-    Nadam = 10,
-    Eve = 11,
-    Santa = 12,
-    GDByGD = 13,
-    AdaSecant = 14,
-    AMSGrad = 15,
-    AdaBound = 16,
-    AMSBound = 17,
-    AdaBelief = 18,
+pub enum OptimizerEnum<T: CrateFloat> {
+    SGD(T),
+    Momentum(T, T),
+    Nesterov(T, T),
+    AdaGrad(T),
+    RMSprop(T, T),
+    AdaDelta(T),
+    Adam(T, T, T),
+    RMSpropGraves(T),
+    SMORMS3(T),
+    AdaMax(T),
+    Nadam(T),
+    Eve(T),
+    Santa(T),
+    GDByGD(T),
+    AdaSecant(T),
+    AMSGrad(T),
+    AdaBound(T),
+    AMSBound(T),
+    AdaBelief(T),
 }
 
-impl Display for OptimizerEnum {
+impl<T> Display for OptimizerEnum<T>
+where
+    T: CrateFloat,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            OptimizerEnum::SGD => write!(f, "SGD"),
-            OptimizerEnum::Momentum => write!(f, "Momentum"),
-            OptimizerEnum::Nesterov => write!(f, "Nesterov"),
-            OptimizerEnum::AdaGrad => write!(f, "AdaGrad"),
-            OptimizerEnum::RMSprop => write!(f, "RMSprop"),
-            OptimizerEnum::AdaDelta => write!(f, "AdaDelta"),
-            OptimizerEnum::Adam => write!(f, "Adam"),
-            OptimizerEnum::RMSpropGraves => write!(f, "RMSpropGraves"),
-            OptimizerEnum::SMORMS3 => write!(f, "SMORMS3"),
-            OptimizerEnum::AdaMax => write!(f, "AdaMax"),
-            OptimizerEnum::Nadam => write!(f, "Nadam"),
-            OptimizerEnum::Eve => write!(f, "Eve"),
-            OptimizerEnum::Santa => write!(f, "Santa"),
-            OptimizerEnum::GDByGD => write!(f, "GDByGD"),
-            OptimizerEnum::AdaSecant => write!(f, "AdaSecant"),
-            OptimizerEnum::AMSGrad => write!(f, "AMSGrad"),
-            OptimizerEnum::AdaBound => write!(f, "AdaBound"),
-            OptimizerEnum::AMSBound => write!(f, "AMSBound"),
-            OptimizerEnum::AdaBelief => write!(f, "AdaBelief"),
+            OptimizerEnum::SGD(lr) => write!(f, "SGD (lr: {})", lr),
+            OptimizerEnum::Momentum(lr, momentum) => {
+                write!(f, "Momentum (lr: {}, momentum: {})", lr, momentum)
+            }
+            OptimizerEnum::Nesterov(lr, momentum) => {
+                write!(f, "Nesterov (lr: {}, momentum: {})", lr, momentum)
+            }
+            OptimizerEnum::AdaGrad(lr) => write!(f, "AdaGrad (lr: {})", lr),
+            OptimizerEnum::RMSprop(lr, decay_rate) => {
+                write!(f, "RMSprop (lr: {}, decay_rate: {})", lr, decay_rate)
+            }
+            OptimizerEnum::AdaDelta(_) => write!(f, "AdaDelta"),
+            OptimizerEnum::Adam(lr, beta1, beta2) => {
+                write!(f, "Adam (lr: {}, beta1: {}, beta2: {})", lr, beta1, beta2)
+            }
+            OptimizerEnum::RMSpropGraves(_) => write!(f, "RMSpropGraves"),
+            OptimizerEnum::SMORMS3(_) => write!(f, "SMORMS3"),
+            OptimizerEnum::AdaMax(_) => write!(f, "AdaMax"),
+            OptimizerEnum::Nadam(_) => write!(f, "Nadam"),
+            OptimizerEnum::Eve(_) => write!(f, "Eve"),
+            OptimizerEnum::Santa(_) => write!(f, "Santa"),
+            OptimizerEnum::GDByGD(_) => write!(f, "GDByGD"),
+            OptimizerEnum::AdaSecant(_) => write!(f, "AdaSecant"),
+            OptimizerEnum::AMSGrad(_) => write!(f, "AMSGrad"),
+            OptimizerEnum::AdaBound(_) => write!(f, "AdaBound"),
+            OptimizerEnum::AMSBound(_) => write!(f, "AMSBound"),
+            OptimizerEnum::AdaBelief(_) => write!(f, "AdaBelief"),
         }
     }
 }
 
 /// generate an optimizer
 pub fn call_optimizer<T: 'static, D: 'static, Sh>(
-    name: OptimizerEnum,
+    optimizer_enum: OptimizerEnum<T>,
     shape: Sh,
-    params: &[T],
 ) -> Box<dyn OptimizerBase<Src = Array<T, D>>>
 where
     T: CrateFloat,
     D: Dimension,
     Sh: ShapeBuilder<Dim = D>,
 {
-    match name {
-        OptimizerEnum::SGD => return Box::new(SGD::new(params[0])),
-        OptimizerEnum::Momentum => return Box::new(Momentum::new(params[0], params[1], shape)),
-        OptimizerEnum::Nesterov => return Box::new(Nesterov::new(params[0], params[1], shape)),
-        OptimizerEnum::AdaGrad => return Box::new(AdaGrad::new(params[0], shape)),
-        OptimizerEnum::RMSprop => return Box::new(RMSprop::new(params[0], params[1], shape)),
-        // OptimizerEnum::AdaDelta => return Box::new(AdaDelta::new(params[0], params[1], shape)),
-        OptimizerEnum::Adam => return Box::new(Adam::new(params[0], params[1], params[1], shape)),
-        // OptimizerEnum::RMSpropGraves => return Box::new(RMSpropGraves::new(params[0], params[1], shape)),
-        // OptimizerEnum::SMORMS3 => return Box::new(SMORMS3::new(params[0], params[1], shape)),
-        // OptimizerEnum::AdaMax => return Box::new(AdaMax::new(params[0], params[1], shape)),
-        // OptimizerEnum::Nadam => return Box::new(Nadam::new(params[0], params[1], shape)),
-        // OptimizerEnum::Eve => return Box::new(Eve::new(params[0], params[1], shape)),
-        // OptimizerEnum::Santa => return Box::new(Santa::new(params[0], params[1], shape)),
-        // OptimizerEnum::GDByGD => return Box::new(GDByGD::new(params[0], params[1], shape)),
-        // OptimizerEnum::AdaSecant => return Box::new(AdaSecant::new(params[0], params[1], shape)),
-        // OptimizerEnum::AMSGrad => return Box::new(AMSGrad::new(params[0], params[1], shape)),
-        // OptimizerEnum::AdaBound => return Box::new(AdaBound::new(params[0], params[1], shape)),
-        // OptimizerEnum::AMSBound => return Box::new(AMSBound::new(params[0], params[1], shape)),
-        // OptimizerEnum::AdaBelief => return Box::new(AdaBelief::new(params[0], params[1], shape)),
-        _ => panic!("Invalid optimizer name: {}", name),
+    match optimizer_enum {
+        OptimizerEnum::SGD(lr) => return Box::new(SGD::new(lr)),
+        OptimizerEnum::Momentum(lr, momentum) => {
+            return Box::new(Momentum::new(lr, momentum, shape))
+        }
+        OptimizerEnum::Nesterov(lr, momentum) => {
+            return Box::new(Nesterov::new(lr, momentum, shape))
+        }
+        OptimizerEnum::AdaGrad(lr) => return Box::new(AdaGrad::new(lr, shape)),
+        OptimizerEnum::RMSprop(lr, decay_rate) => {
+            return Box::new(RMSprop::new(lr, decay_rate, shape))
+        }
+        // OptimizerEnum::AdaDelta(lr) => return Box::new(AdaDelta::new(lr, shape)),
+        OptimizerEnum::Adam(lr, beta1, beta2) => {
+            return Box::new(Adam::new(lr, beta1, beta2, shape))
+        }
+        // OptimizerEnum::RMSpropGraves(lr) => return Box::new(RMSpropGraves::new(lr, shape)),
+        // OptimizerEnum::SMORMS3(lr) => return Box::new(SMORMS3::new(lr, shape)),
+        // OptimizerEnum::AdaMax(lr) => return Box::new(AdaMax::new(lr, shape)),
+        // OptimizerEnum::Nadam(lr) => return Box::new(Nadam::new(lr, shape)),
+        // OptimizerEnum::Eve(lr) => return Box::new(Eve::new(lr, shape)),
+        // OptimizerEnum::Santa(lr) => return Box::new(Santa::new(lr, shape)),
+        // OptimizerEnum::GDByGD(lr) => return Box::new(GDByGD::new(lr, shape)),
+        // OptimizerEnum::AdaSecant(lr) => return Box::new(AdaSecant::new(lr, shape)),
+        // OptimizerEnum::AMSGrad(lr) => return Box::new(AMSGrad::new(lr, shape)),
+        // OptimizerEnum::AdaBound(lr) => return Box::new(AdaBound::new(lr, shape)),
+        // OptimizerEnum::AMSBound(lr) => return Box::new(AMSBound::new(lr, shape)),
+        // OptimizerEnum::AdaBelief(lr) => return Box::new(AdaBelief::new(lr, shape)),
+        _ => panic!("Invalid optimizer name: {}", optimizer_enum),
     }
 }
