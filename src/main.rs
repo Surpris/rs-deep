@@ -69,6 +69,7 @@ fn main() {
 
     // common
     // rs_deep::dlfs01::common::models::mlp::main();
+}
 
 fn test() {
     let a: ModelParameters<f32> = ModelParameters::new();
