@@ -43,7 +43,7 @@ impl<T> CrateFloat for T where
         + ScalarOperand
         + Debug
         + Display
-        + Serialize // + Deserialize<'static>
+        + Serialize // + Deserialize<'static
 {
 }
 

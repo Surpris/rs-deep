@@ -67,9 +67,8 @@ fn main() {
     // examples
     rs_deep::dlfs01::examples::train_mlp_test::main();
 
-    // test
-    // test();
-}
+    // common
+    // rs_deep::dlfs01::common::models::mlp::main();
 
 fn test() {
     let a: ModelParameters<f32> = ModelParameters::new();
