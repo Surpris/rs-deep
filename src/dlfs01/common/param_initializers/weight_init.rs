@@ -30,7 +30,7 @@ impl Display for WeightInitEnum {
 }
 
 pub fn initialize_weight<T, D, Sh>(
-    name: WeightInitEnum,
+    weight_init: WeightInitEnum,
     weight_init_std: T,
     shape: Sh,
 ) -> Array<T, D>
@@ -44,7 +44,7 @@ where
         shape,
         &[cast_t2u(0.0), cast_t2u(1.0)],
     );
-    let scale: T = match name {
+    let scale: T = match weight_init {
         WeightInitEnum::Normal => weight_init_std,
         WeightInitEnum::ReLU | WeightInitEnum::He => {
             cast_t2u::<f64, T>(1.0) / cast_t2u::<usize, T>(src.len_of(Axis(0))).sqrt()
