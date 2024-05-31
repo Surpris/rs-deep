@@ -300,7 +300,7 @@ where
             self.momentum = Array::<T, D>::zeros(param.raw_dim());
         }
         self.iter = self.iter + self.one;
-        let lr_t: T = self.lr * (self.one - self.beta2.powf(self.iter))
+        let lr_t: T = self.lr * (self.one - self.beta2.powf(self.iter)).sqrt()
             / (self.one - self.beta1.powf(self.iter));
         for (v, m, p, g) in multizip((
             self.param.iter_mut(),

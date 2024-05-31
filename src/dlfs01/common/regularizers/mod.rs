@@ -98,9 +98,9 @@ where
         } else {
             x.map(|&v| {
                 if v > self.zero {
-                    -self.decay_lambda
-                } else if v < self.zero {
                     self.decay_lambda
+                } else if v < self.zero {
+                    -self.decay_lambda
                 } else {
                     self.zero
                 }
@@ -161,7 +161,7 @@ where
         if self.decay_lambda == self.zero {
             Self::A::zeros(x.raw_dim())
         } else {
-            x.map(|&v| -self.decay_lambda * v)
+            x.map(|&v| self.decay_lambda * v)
         }
     }
 

@@ -26,23 +26,25 @@ impl<T> Affine<T>
 where
     T: CrateFloat,
 {
-    pub fn new(shape: (usize, usize), weight_init: WeightInitEnum, weight_init_std: T) -> Self {
-        Affine {
-            weight: initialize_weight(weight_init.clone(), weight_init_std, shape),
-            bias: initialize_weight(weight_init, weight_init_std, shape.1),
-            dw: Array2::<T>::ones(shape),
-            db: Array1::<T>::ones(shape.1),
-            buff: Array2::<T>::ones(shape),
-        }
+    pub fn new(
+        weight_shape: (usize, usize),
+        weight_init: WeightInitEnum,
+        weight_init_std: T,
+    ) -> Self {
+        Self::from(
+            &initialize_weight(weight_init.clone(), weight_init_std, weight_shape),
+            &initialize_weight(weight_init, weight_init_std, weight_shape.1),
+        )
     }
     pub fn from(weight: &Array2<T>, bias: &Array1<T>) -> Self {
-        let shape = weight.shape();
+        let weight_shape = weight.raw_dim();
+        let bias_shape = bias.raw_dim();
         Affine {
             weight: weight.clone(),
             bias: bias.clone(),
-            dw: Array2::<T>::ones((shape[0], shape[1])),
-            db: Array1::<T>::ones(shape[1]),
-            buff: Array2::<T>::ones((shape[0], shape[1])),
+            dw: Array2::ones(weight_shape),
+            db: Array1::ones(bias_shape),
+            buff: Array2::ones(weight_shape),
         }
     }
 }
@@ -69,8 +71,8 @@ where
     }
     fn print_detail(&self) {
         println!("affine layer.");
-        println!("weight shape: {:?}", self.weight.shape());
-        println!("bias shape: {:?}", self.bias.shape());
+        println!("weight weight_shape: {:?}", self.weight.shape());
+        println!("bias weight_shape: {:?}", self.bias.shape());
     }
     fn print_parameters(&self) {
         println!("weight: {:?}", self.weight);
