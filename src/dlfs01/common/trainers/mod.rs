@@ -120,7 +120,7 @@ where
         // choose indices
         let mut indices: Vec<usize> = vec![0usize; self.batch_size];
         for jj in 0..self.batch_size {
-            indices[jj] = rng.gen_range(0, self.x_train.len_of(Axis(self.batch_axis)));
+            indices[jj] = rng.gen_range(0..self.x_train.len_of(Axis(self.batch_axis)));
         }
         let x_batch = self.x_train.select(Axis(0), &indices);
         let t_batch = self.t_train.select(Axis(0), &indices);

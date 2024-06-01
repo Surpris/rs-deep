@@ -76,7 +76,7 @@ pub fn main() {
         // choose indices
         let mut indices: Vec<usize> = Vec::new();
         for _ in 0..BATCH_SIZE {
-            indices.push(rng.gen_range(0, nbr_train_images));
+            indices.push(rng.gen_range(0..nbr_train_images));
         }
         // choose batched data set
         let x_batch: Vec2d<FF> = data_set.train_images.shuffle_copy_by_indices(&indices);

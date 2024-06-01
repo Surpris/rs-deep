@@ -8,7 +8,7 @@
 
 use super::super::util::*;
 use super::layer_base::LayerBase;
-use itertools::multizip;
+// use itertools::multizip;
 use ndarray::{prelude::*, RemoveAxis};
 use std::fmt::{Debug, Display};
 
