@@ -132,7 +132,7 @@ where
         }
         DistributionEnum::Poisson => {
             let gen = Poisson::new(cast_t2u::<T, f64>(params[0])).unwrap();
-            Array::<T, D>::zeros(shape).map(|_| cast_t2u::<u64, T>(gen.sample(&mut rng)))
+            Array::<T, D>::zeros(shape).map(|_| cast_t2u::<f64, T>(gen.sample(&mut rng)))
         }
         DistributionEnum::StudentT => {
             let gen = StudentT::new(cast_t2u::<T, f64>(params[0])).unwrap();
