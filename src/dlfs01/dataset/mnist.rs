@@ -18,7 +18,9 @@ use thiserror::Error as ThisError;
 const MNIST_DIR: &str = "./data/mnist/";
 const LENA_DIR: &str = "./images/lena/";
 
-const URL_BASE: &str = "http://yann.lecun.com/exdb/mnist/";
+// const URL_BASE: &str = "http://yann.lecun.com/exdb/mnist/";
+const URL_BASE: &str = "https://ossci-datasets.s3.amazonaws.com/mnist/";  // mirror site
+
 const KEY_FILE_GZ: [(&str, &str); 4] = [
     ("train_img", "train-images-idx3-ubyte.gz"),
     ("train_label", "train-labels-idx1-ubyte.gz"),
@@ -26,10 +28,10 @@ const KEY_FILE_GZ: [(&str, &str); 4] = [
     ("test_label", "t10k-labels-idx1-ubyte.gz"),
 ];
 const KEY_FILE: [(&str, &str); 4] = [
-    ("train_img", "train-images-idx3-ubyte"),
-    ("train_label", "train-labels-idx1-ubyte"),
-    ("test_img", "t10k-images-idx3-ubyte"),
-    ("test_label", "t10k-labels-idx1-ubyte"),
+    ("train_img", "train-images.idx3-ubyte"),
+    ("train_label", "train-labels.idx1-ubyte"),
+    ("test_img", "t10k-images.idx3-ubyte"),
+    ("test_label", "t10k-labels.idx1-ubyte"),
 ];
 
 const NBR_SKIP_BYTES_IMAGE: usize = 16;
