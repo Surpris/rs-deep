@@ -60,9 +60,6 @@ pub use crate::dlfs01::common::optimizers::optimizer_base::OptimizerBase;
 pub use crate::dlfs01::common::optimizers::optimizer::{AdaGrad, Adam, Nesterov, RMSprop, SGD};
 
 #[doc(no_inline)]
-pub use crate::dlfs01::common::param_initializers::weight_init::*;
-
-#[doc(no_inline)]
 pub use crate::dlfs01::common::param_initializers::ndarray_init::{
     initialize_randomized_ndarray, DistributionEnum,
 };
